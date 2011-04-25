@@ -1,6 +1,6 @@
 import scala.swing._
 
-object App extends SimpleGUIApplication {
+object App extends SimpleSwingApplication {
   def top = new MainFrame {
     title = "Thimblr"
     contents = new BoxPanel(Orientation.Vertical) {
