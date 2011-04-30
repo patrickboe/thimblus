@@ -9,16 +9,22 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
   "streamer" when {
     "called with a string argument" should {
       "return a function that streams from the file in that path" in {
-        val testStreamer = streamer("test/testplans/.plan.simple") 
-        val stream = testStreamer()
-        try {
-          assert(stream.toString() ==
+        val planStream = streamer("src/test/resources/testplans/.plan.simple")()
+        val actual = Stream
+                      .continually(planStream.read)
+                      .takeWhile(-1 !=)
+                      .map(_.toChar)
+                      .mkString
+        val expected =
 """This file
 Has three lines
-Of text."""
-          )
+Of text.
+"""
+        try {
+          assert(actual == expected,
+            "\n" + actual + " should have been\n" + expected + " but was not.")
         } finally {
-          stream.close()
+          planStream.close()
         }
       }
     }

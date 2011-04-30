@@ -1,9 +1,9 @@
 package thimblr
 
-import java.io.FileReader
+import java.io._
 
 object Planfile {
-  def streamer(path: String)() = new java.io.FileReader(path)
+  def streamer(path: String)() = new FileReader(path)
 }
 
 // vim: set sw=2 set softtabstop=2 et:
