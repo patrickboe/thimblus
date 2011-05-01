@@ -2,15 +2,15 @@ package org.thimblr.test.model
 
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
-import java.io.FileWriter
+import java.io._
 import org.thimblr.io._
 
 class PlanFileSpec extends WordSpec with ShouldMatchers {
   "streamer" when {
-    "called with a string argument" should {
+    "called with a valid path" should {
       "return a lazy stream from the file in that path" in {
         val path = "src/test/resources/testplans/.plan.simple"
-        val overwriter = new java.io.FileWriter(path)
+        val overwriter = new FileWriter(path)
         try {
           overwriter.write(
 """This file
@@ -19,7 +19,7 @@ Of text."""
           )
         } finally { overwriter.close() }
         val makeStream = Local.streamer(path)
-        val appender = new java.io.FileWriter(path,true)
+        val appender = new FileWriter(path,true)
         try { appender.write("YEAAAAAAAAAA!") } finally { appender.close() }
         val expected =
 """This file
@@ -37,6 +37,21 @@ Of text.YEAAAAAAAAAA!"""
         } finally {
           planStream.close()
         }
+      }
+    }
+    
+    "called with an invalid path" should {
+      "throw a corresponding PlanNotFound exception" in {
+        val path = "src/test/resources/testplans/.plan.missing"
+        val makeStream=Local.streamer(path)
+        val ex = intercept[PlanNotFoundException] {
+          val planStream=makeStream()
+        }
+        val cause = ex.getCause
+        intercept[FileNotFoundException] { throw cause }
+        val expectedMessage = cause.toString
+        assert(ex.getMessage==expectedMessage, 
+          "expected this exception message: " + expectedMessage + ", but got this: " + ex.getMessage)
       }
     }
   }
