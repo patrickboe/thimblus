@@ -1,4 +1,4 @@
-package org.thimblr.test.model
+package org.thimblr.test.io
 
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -6,9 +6,9 @@ import java.io._
 import org.thimblr.io._
 
 class PlanFileSpec extends WordSpec with ShouldMatchers {
-  "streamer" when {
+  "readerMaker" when {
     "called with a valid path" should {
-      "return a lazy stream from the file in that path" in {
+      "return a lazy reader from the file in that path" in {
         val path = "src/test/resources/testplans/.plan.simple"
         val overwriter = new FileWriter(path)
         try {
@@ -18,24 +18,24 @@ Has three lines
 Of text."""
           )
         } finally { overwriter.close() }
-        val makeStream = Local.streamer(path)
+        val makeReader = Local.readerMaker(path)
         val appender = new FileWriter(path,true)
         try { appender.write("YEAAAAAAAAAA!") } finally { appender.close() }
         val expected =
 """This file
 Has three lines
 Of text.YEAAAAAAAAAA!"""
-        lazy val planStream = makeStream()
+        val planReader = makeReader()
         try {
           val actual = Stream
-                        .continually(planStream.read)
+                        .continually(planReader.read)
                         .takeWhile(_ != -1)
                         .map(_.toChar)
                         .mkString
           assert(actual == expected,
             "\n" + actual + " should have been\n" + expected + " but was not.")
         } finally {
-          planStream.close()
+          planReader.close()
         }
       }
     }
@@ -43,9 +43,9 @@ Of text.YEAAAAAAAAAA!"""
     "called with an invalid path" should {
       "throw a corresponding PlanNotFound exception" in {
         val path = "src/test/resources/testplans/.plan.missing"
-        val makeStream=Local.streamer(path)
+        val makeReader=Local.readerMaker(path)
         val ex = intercept[PlanNotFoundException] {
-          val planStream=makeStream()
+          val planReader=makeReader()
         }
         val cause = ex.getCause
         intercept[FileNotFoundException] { throw cause }

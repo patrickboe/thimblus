@@ -1,14 +1,23 @@
 package org.thimblr
 
-import java.io._
+import java.io.{Reader,BufferedReader}
 
 object Plan {
 
-  def stringifyStreamer (streamer: =>Reader) {
-    ""
+  def stringify (planReader: => Reader) = {
+    val reader = new BufferedReader(planReader)
+    try {
+      Stream
+        .continually(reader.read)
+        .takeWhile(_ != -1)
+        .map(_.toChar)
+        .mkString
+    } finally {
+      reader.close()
+    }
   }
 
-  def parseJSONPlan (plan: String) {
+  def parseJSONPlan (plan: String) = {
     null
   }
 }
