@@ -1,5 +1,6 @@
 package org.thimblr
 
+import net.liftweb.json.JsonParser._
 import java.io.{Reader,BufferedReader}
 
 object Plan {
@@ -17,8 +18,8 @@ object Plan {
     }
   }
 
-  def parseJSONPlan (plan: String) = {
-    null
+  def parseJSON (json: String) = {
+    parse(json)  
   }
 }
 
