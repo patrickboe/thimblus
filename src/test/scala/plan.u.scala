@@ -56,14 +56,28 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
         assert(top == "gov")
       }
     }
+
+    "passed a single-part name" should {
+      "not match" in {
+        intercept[MatchError]{ val Domain(sub, top) = "pickles" }
+      }
+    }
   }
 
   "Address" when {
     "passed a standard email" should {
       "separate the username and domain" in {
-        val Address(name, Domain(sub, top)) = "fprince@belaire.ca.state.gov"
+        val Address(name, domain) = "fprince@belaire.ca.state.gov"
         assert(name == "fprince")
-        assert(sub == "belaire.ca.state")
+        assert(domain == "belaire.ca.state.gov")
+      }
+    }
+
+    "passed just a username" should {
+      "match the username" in {
+        val Address(name, domain) = "fprince"
+        assert(name =="fprince")
+        assert(domain==None)
       }
     }
   }

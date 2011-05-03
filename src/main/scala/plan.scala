@@ -16,6 +16,10 @@ package org.thimblr {
       }
     }
 
+    def when [T](predicate: => Boolean)(expression: => T) = {
+      if(predicate) Some(expression) else None
+    }
+
     class Slashable(s: String) {
       def / (at: Int) = (s take at, s drop (at+1))
     }
@@ -31,14 +35,21 @@ package org.thimblr {
     object Domain {
       def unapply(str: String) = {
         val lastDot = str lastIndexOf "."
-        if(lastDot>0) Some(str/lastDot) else None
+        when(lastDot>0) { 
+          str/lastDot 
+        }
       }
     }
 
     object Address {
       def unapply(str: String) = {
         val lastAt = str lastIndexOf "@"
-        if(lastAt>0) Some(str/lastAt) else None
+        Some {
+          if(lastAt>0)
+            str/lastAt 
+          else 
+            (str, None)
+        }
       }
     }
   }
