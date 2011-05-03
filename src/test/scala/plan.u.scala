@@ -4,8 +4,10 @@ import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.TestFailedException
 import java.io._
+import net.liftweb.json._
 import net.liftweb.json.JsonAST._
-import org.thimblr.Plan._
+import org.thimblr.plan._
+import org.thimblr.Parsing._
 
 class PlanFileSpec extends WordSpec with ShouldMatchers {
   "readToString" when {
@@ -46,39 +48,40 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
   //sort a list of messages
   //build a plan from a sorted list of messages, a sorted list of followers, and an address
 
-  "parseJSON" when {
-    "passed a plan string" should {
-      "return a corresponding plan case class" in {
-        val testJSON =
-"""
-{
-  "following": [
-      {"address": "djjz@wphila.gov"},
-      {"address": "freshp@belaire.gov"}
-    ],
-  "address": "worldwide@phila.gov",
-  "messages": [
-      {"text": "I'm risin' to the shine", "time": "12:20"},
-      {"text": "I ain't left the rest", "time": "3:37"},
-      {"text": "Laying around, louging.", "time": "2:00"}
-    ]
-}
-"""
-        val plan = parseJSON(testJSON)
-        val JArray(following) = plan \ "following"
-        val JArray(messages) = plan \ "messages"
-        val JString(firstFollowed) = following.head \ "address"
-        val JString(address) = plan \ "address"
-        val JString(firstMessage) = messages.head \ "text"
-        assert(firstFollowed == "djjz@wphila.gov",
-          "unexpected first address: " + firstFollowed)
-        assert(following.size == 2, "unexpected following size")
-        assert(address == "worldwide@phila.gov", "unexpected address")
-        assert(firstMessage =="I'm risin' to the shine", "unexpected first status")
-        assert(messages.size == 3, "unexpected messages size")
+  "Domain" when {
+    "passed a multi-part name" should {
+      "put the last part in the top field" in {
+        val Domain(sub, top) = "wphila.pa.state.gov"
+        assert(sub == "wphila.pa.state")
+        assert(top == "gov")
       }
     }
   }
+
+  "Address" when {
+    "passed a standard email" should {
+      "separate the username and domain" in {
+        val Address(name, Domain(sub, top)) = "fprince@belaire.ca.state.gov"
+        assert(name == "fprince")
+        assert(sub == "belaire.ca.state")
+      }
+    }
+  }
+
+  val testPlan = """
+  {
+    "following": [
+        {"address": "djjz@wphila.pa.state.gov"},
+        {"address": "freshp@belaire.ca.state.gov"}
+      ],
+    "address": "worldwide@phila.gov",
+    "messages": [
+        {"text": "I'm risin' to the shine", "time": "12:20"},
+        {"text": "I ain't left the rest", "time": "3:37"},
+        {"text": "Laying around, louging.", "time": "2:00"}
+      ]
+  }
+  """
 }
 
 class FailReader extends Reader {
@@ -90,5 +93,4 @@ class FailReader extends Reader {
     throw onReadException
   }
 }
-
 // vim: set sw=2 set softtabstop=2 et:
