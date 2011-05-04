@@ -32,7 +32,7 @@ package org.thimblr {
     import Parsing._
     import net.liftweb.json.JsonParser._
 
-    object Domain {
+    object Domainex {
       def unapply(str: String) = {
         val lastDot = str lastIndexOf "."
         when(lastDot>0) { 
@@ -41,7 +41,22 @@ package org.thimblr {
       }
     }
 
-    object Address {
+    object Timex {
+      def unapply(str: String) = {
+        when(str.length==14 && isLong(str)){
+          val intAt = (start: Int,stop: Int) => str.substring(start,stop).toInt
+          Time(intAt(0,4),intAt(4,6),intAt(6,8),intAt(8,10),intAt(10,12),intAt(12,14))
+        }
+      }
+
+      private def isLong(str: String) = {
+        try { str.toLong>0 } catch { case ex: NumberFormatException => false }
+      }
+    }
+
+    case class Time(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int)
+
+    object Addressex {
       def unapply(str: String) = {
         val lastAt = str lastIndexOf "@"
         Some {

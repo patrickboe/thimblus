@@ -47,11 +47,32 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
   //sort a list of addresses
   //sort a list of messages
   //build a plan from a sorted list of messages, a sorted list of followers, and an address
+  "Timex" when {
+    "extracting a time string" should {
+      "separate year, month, day, hours, minutes, and seconds" in {
+        val Timex(t) = "20110315104022"
+        assert(t.year==2011 &&
+          t.month==03 &&
+          t.day==15 &&
+          t.hour==10 &&
+          t.minute==40 &&
+          t.second==22)
+      }
+    }
 
-  "Domain" when {
+    "extracting a wrong-sized time string" should { "fail" in {
+      intercept[MatchError]{ val Timex(t) = "1234" }
+    }}
+
+    "extracting an invalid time string" should { "fail" in {
+      intercept[MatchError]{ val Timex(t) = "1a234567891234" }
+    }}
+  }
+
+  "Domainex" when {
     "passed a multi-part name" should {
       "put the last part in the top field" in {
-        val Domain(sub, top) = "wphila.pa.state.gov"
+        val Domainex(sub, top) = "wphila.pa.state.gov"
         assert(sub == "wphila.pa.state")
         assert(top == "gov")
       }
@@ -59,15 +80,15 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
 
     "passed a single-part name" should {
       "not match" in {
-        intercept[MatchError]{ val Domain(sub, top) = "pickles" }
+        intercept[MatchError]{ val Domainex(sub, top) = "pickles" }
       }
     }
   }
 
-  "Address" when {
+  "Addressex" when {
     "passed a standard email" should {
       "separate the username and domain" in {
-        val Address(name, domain) = "fprince@belaire.ca.state.gov"
+        val Addressex(name, domain) = "fprince@belaire.ca.state.gov"
         assert(name == "fprince")
         assert(domain == "belaire.ca.state.gov")
       }
@@ -75,7 +96,7 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
 
     "passed just a username" should {
       "match the username" in {
-        val Address(name, domain) = "fprince"
+        val Addressex(name, domain) = "fprince"
         assert(name =="fprince")
         assert(domain==None)
       }
