@@ -4,6 +4,7 @@ import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.TestFailedException
 import java.io._
+import java.util._
 import net.liftweb.json._
 import net.liftweb.json.JsonAST._
 import org.thimblr.plan._
@@ -40,33 +41,31 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
     }
   }
 
-  //parse json
-  //convert an address string to an address obj
-  //convert a time string to a time obj
   //convert a message pair to a message obj
   //sort a list of addresses
   //sort a list of messages
   //build a plan from a sorted list of messages, a sorted list of followers, and an address
-  "Timex" when {
-    "extracting a time string" should {
-      "separate year, month, day, hours, minutes, and seconds" in {
-        val Timex(t) = "20110315104022"
-        assert(t.year==2011 &&
-          t.month==03 &&
-          t.day==15 &&
-          t.hour==10 &&
-          t.minute==40 &&
-          t.second==22)
+  "Dates" when {
+    "extracted from correct strings" should {
+      val d = parse("[\"20110315104022\"]")(0).extract[Date]
+
+      "match the time minus four hours if you're in New York" in {
+        val c = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"),Locale.US)
+        c.setTime(d)
+        assert(c.get(Calendar.YEAR)==2011 &&
+          c.get(Calendar.MONTH)==Calendar.MARCH &&
+          c.get(Calendar.DAY_OF_MONTH)==15 &&
+          c.get(Calendar.HOUR_OF_DAY)==6 &&
+          c.get(Calendar.MINUTE)==40 &&
+          c.get(Calendar.SECOND)==22)
+      }
+
+      "match the time minus five hours if you're in Chicago" in {
+        val c = Calendar.getInstance(TimeZone.getTimeZone("America/Chicago"),Locale.US)
+        c.setTime(d)
+        assert(c.get(Calendar.HOUR_OF_DAY)==5)
       }
     }
-
-    "extracting a wrong-sized time string" should { "fail" in {
-      intercept[MatchError]{ val Timex(t) = "1234" }
-    }}
-
-    "extracting an invalid time string" should { "fail" in {
-      intercept[MatchError]{ val Timex(t) = "1a234567891234" }
-    }}
   }
 
   "Domainex" when {
