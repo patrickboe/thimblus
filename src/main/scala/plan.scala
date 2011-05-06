@@ -1,23 +1,6 @@
 package org.thimblr {
-  import net.liftweb.json._
-  import net.liftweb.json.JsonParser._
 
-  object Parsing {
-    import java.io._
-    import java.text._
-
-    def stringify (planReader: => Reader) = {
-      val reader = new BufferedReader(planReader)
-      try {
-        Stream
-          .continually(reader.read)
-          .takeWhile(_ != -1)
-          .map(_.toChar)
-          .mkString
-      } finally {
-        reader.close()
-      }
-    }
+  object Util {
 
     def when [T](predicate: => Boolean)(expression: => T) = {
       if(predicate) Some(expression) else None
@@ -29,13 +12,40 @@ package org.thimblr {
 
     implicit def string2Slashable(s: String) = new Slashable(s)
 
-    implicit val formats = new DefaultFormats {
-      override def dateFormatter = new SimpleDateFormat("yyyyMMddHHmmss")
+    class Questionable[T](thing: T) {
+      def ?? (fallback: T) = {
+        if(thing!=null) thing else fallback
+      }
     }
-  }
 
+    implicit def thing2Questionable[T](thing: T) = new Questionable[T](thing)
+
+  }
+    
   package plan {
-    import Parsing._
+    import Util._
+    import java.util._
+    import java.io._
+    import net.liftweb.json._
+    import net.liftweb.json.JsonParser._
+    import java.text._
+
+    object Parsing {
+      implicit val formats = new ThimblrFormats()
+
+      def stringify (planReader: => Reader) = {
+        val reader = new BufferedReader(planReader)
+        try {
+          Stream
+            .continually(reader.read)
+            .takeWhile(_ != -1)
+            .map(_.toChar)
+            .mkString
+        } finally {
+          reader.close()
+        }
+      }
+    }
 
     object Domainex {
       def unapply(str: String) = {
@@ -55,6 +65,29 @@ package org.thimblr {
           else 
             (str, None)
         }
+      }
+    }
+
+    class ThimblrFormats extends Formats {
+      
+      private val full=new SimpleDateFormat("yyyyMMddHHmmssz")
+      private val lenient=new SimpleDateFormat("yyyyMMddHHmmss")
+      private val utc=TimeZone.getTimeZone("UTC")
+      full.setTimeZone(utc)
+      lenient.setTimeZone(utc)
+
+      val dateFormat = new net.liftweb.json.DateFormat {    
+        def parse(s: String) = try {
+          Some(full.parse(s))
+        } catch {
+          case e: java.text.ParseException => try {
+              Some(lenient.parse(s))
+            } catch {
+              case e: java.text.ParseException => None
+            }
+        }
+
+        def format(d: Date) = full.format(d)
       }
     }
   }
