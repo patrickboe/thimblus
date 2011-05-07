@@ -72,7 +72,7 @@ package org.thimblr {
     
     case class Follower(address: String)
 
-    case class Message(text: String, time: String)
+    case class Message(text: String, time: Date)
 
     class ThimblrFormats extends Formats {
       

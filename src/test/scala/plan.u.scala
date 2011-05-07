@@ -89,8 +89,10 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
     "match messages" in {
       val jsonMsg =(parse(testPlan) \ "messages")(0)
       val m = jsonMsg.extract[Message]
-      assert(m.text == "I'm risin' to the shine", "text value " + m.text + "unexpected")
-      assert(m.time == "12:20", "time value " + m.time + "unexpected")
+      assert(m.text == "I'm risin' to the shine", "text value " + m.text + " unexpected")
+      assert(m.time == parsedFirstPostDate, 
+        "expected time value " + parsedFirstPostDate + 
+        ", got " +  m.time)
     }
   }
 
@@ -101,7 +103,7 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
       assert(p.following.length==2)
       assert(p.messages.length==3)
       assert(p.following.head==Follower("djjz@wphila.pa.state.gov"))
-      assert(p.messages.head==Message("I'm risin' to the shine", "12:20"))
+      assert(p.messages.head== Message( "I'm risin' to the shine",  parsedFirstPostDate))
     }
   }
 
@@ -147,12 +149,17 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
       ],
     "address": "worldwide@phila.gov",
     "messages": [
-        {"text": "I'm risin' to the shine", "time": "12:20"},
-        {"text": "I ain't left the rest", "time": "3:37"},
-        {"text": "Laying around, louging.", "time": "2:00"}
+        {"text": "I'm risin' to the shine", "time": "20110507162004-400"},
+        {"text": "I ain't left the rest", "time":   "20110507193721-400"},
+        {"text": "Laying around, louging.", "time": "20110507180033-400"}
       ]
   }
   """
+
+  val parsedFirstPostDate = 
+    (formats.dateFormat.parse("20110507162004-400"): @unchecked) match { 
+      case Some(d) => d 
+    }
 }
 
 class FailReader extends Reader {
