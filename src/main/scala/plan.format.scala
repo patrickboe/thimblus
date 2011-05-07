@@ -1,0 +1,57 @@
+package org.thimblr.plan
+
+import org.thimblr.Util._
+import java.util.{Date,TimeZone}
+import java.text.SimpleDateFormat
+import net.liftweb.json._
+
+object Format {
+
+  implicit val formats = new ThimblrFormats()
+
+  object Domainex {
+    def unapply(str: String) = {
+      val lastDot = str lastIndexOf "."
+      when(lastDot>0) { 
+        str/lastDot 
+      }
+    }
+  }
+
+  object Addressex {
+    def unapply(str: String) = {
+      val lastAt = str lastIndexOf "@"
+      Some {
+        if(lastAt>0)
+          str/lastAt 
+        else 
+          (str, None)
+      }
+    }
+  }
+
+}
+
+class ThimblrFormats extends Formats {
+  
+  private val full=new SimpleDateFormat("yyyyMMddHHmmssz")
+  private val lenient=new SimpleDateFormat("yyyyMMddHHmmss")
+  private val utc=TimeZone.getTimeZone("UTC")
+  full.setTimeZone(utc)
+  lenient.setTimeZone(utc)
+
+  val dateFormat = new net.liftweb.json.DateFormat {    
+    def parse(s: String) = try {
+      Some(full.parse(s))
+    } catch {
+      case e: java.text.ParseException => try {
+          Some(lenient.parse(s))
+        } catch {
+          case e: java.text.ParseException => None
+        }
+    }
+
+    def format(d: Date) = full.format(d)
+  }
+}
+// vim: set sw=2 set softtabstop=2 et:
