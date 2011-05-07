@@ -87,7 +87,7 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
 
   "Message" should {
     "match messages" in {
-      val jsonMsg = parse("""{"text": "I'm risin' to the shine", "time": "12:20"}""")
+      val jsonMsg =(parse(testPlan) \ "messages")(0)
       val m = jsonMsg.extract[Message]
       assert(m.text == "I'm risin' to the shine", "text value " + m.text + "unexpected")
       assert(m.time == "12:20", "time value " + m.time + "unexpected")
@@ -100,8 +100,8 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
       assert(p.address=="worldwide@phila.gov")
       assert(p.following.length==2)
       assert(p.messages.length==3)
-      assert(p.following.head.isInstanceOf[Follower])
-      assert(p.messages.head.isInstanceOf[Message])
+      assert(p.following.head==Follower("djjz@wphila.pa.state.gov"))
+      assert(p.messages.head==Message("I'm risin' to the shine", "12:20"))
     }
   }
 
