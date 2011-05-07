@@ -48,6 +48,7 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
   "Date" when {
     val nyc = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"),Locale.US)
     val chi = Calendar.getInstance(TimeZone.getTimeZone("America/Chicago"),Locale.US)
+
     "extracted from a correct GMT string" should {
       val d = parse("[\"20110315144022\"]")(0).extract[Date]
 
@@ -73,6 +74,34 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
         nyc.setTime(d)
         assert(nyc.get(Calendar.HOUR_OF_DAY)==14)
       }
+    }
+  }
+
+  "Follower" should {
+    "match followers" in {
+      val jsonMsg = parse("""{"address": "123 Brown Street"}""")
+      val f = jsonMsg.extract[Follower]
+      assert(f.address=="123 Brown Street")
+    }
+  }
+
+  "Message" should {
+    "match messages" in {
+      val jsonMsg = parse("""{"text": "I'm risin' to the shine", "time": "12:20"}""")
+      val m = jsonMsg.extract[Message]
+      assert(m.text == "I'm risin' to the shine", "text value " + m.text + "unexpected")
+      assert(m.time == "12:20", "time value " + m.time + "unexpected")
+    }
+  }
+
+  "Plan" should {
+    "match a plan" in {
+      val p=parse(testPlan).extract[Plan]
+      assert(p.address=="worldwide@phila.gov")
+      assert(p.following.length==2)
+      assert(p.messages.length==3)
+      assert(p.following.head.isInstanceOf[Follower])
+      assert(p.messages.head.isInstanceOf[Message])
     }
   }
 

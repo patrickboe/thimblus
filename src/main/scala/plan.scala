@@ -24,7 +24,7 @@ package org.thimblr {
     
   package plan {
     import Util._
-    import java.util._
+    import java.util.{TimeZone,Date}
     import java.io._
     import net.liftweb.json._
     import net.liftweb.json.JsonParser._
@@ -67,6 +67,12 @@ package org.thimblr {
         }
       }
     }
+
+    case class Plan(address: String, following: List[Follower], messages: List[Message])
+    
+    case class Follower(address: String)
+
+    case class Message(text: String, time: String)
 
     class ThimblrFormats extends Formats {
       
