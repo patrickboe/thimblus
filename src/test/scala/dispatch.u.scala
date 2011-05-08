@@ -15,7 +15,7 @@ class UISuite extends WordSpec with ShouldMatchers {
     "call model.post in response to a post button click event" in {
       var posted = ""
       val expected = "My Next Post..."
-      val mockModel = HomeModel(s => posted = s)
+      val mockModel = new HomeModel(s => posted = s, ()=>null)
       val mockView = new View { 
         val model = mockModel
         val post = new Button()
@@ -25,6 +25,32 @@ class UISuite extends WordSpec with ShouldMatchers {
       dispatch(ButtonClicked(mockView.post))
       posted should equal (expected)
       mockView.message.text should equal ("")
+    }
+  }
+
+  "HomeModel" should {
+    "load the current plan on creation" in {
+      val tastyPlan=Plan("tasty@burgers.com",null,null)
+      val loadPlan=()=>tastyPlan
+      val subject=new HomeModel(s=>Unit,loadPlan)
+      subject.plan should equal (tastyPlan)
+    }
+
+    "load the latest plan after a post" in {
+      var plan=Plan("one@test.com",null,null)
+      val loadPlan=()=>plan
+      val subject=new HomeModel(s=>Unit,loadPlan)
+      plan=Plan("two@test.com",null,null)
+      subject.post("blah")
+      subject.plan should equal(plan)
+    }
+
+    "call its poster when post is called on it" in {
+      var testVal = ""
+      val expected ="bees are a beneficial animal"
+      val subject = new HomeModel(testVal=_,()=>null)
+      subject.post(expected)
+      testVal should equal (expected)
     }
   }
   

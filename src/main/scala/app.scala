@@ -7,7 +7,7 @@ class App
   extends SimpleSwingApplication 
   with org.thimblr.ui.View {
   
-  val model = HomeModel(s=>Unit)
+  val model = new HomeModel(s=>Unit, ()=>null)
   val post = new Button { text = "post" }
   val message = new TextField
 

@@ -4,9 +4,15 @@ import scala.swing._
 import scala.swing.event._
 import org.thimblr.plan._
 
-case class HomeModel(post: String=>Unit) extends HomeSource
+class HomeModel(poster: (String)=>Unit, loadPlan: ()=>Plan) extends HomeSource {
+  plan=loadPlan()
+  def post(s: String) = {
+    poster(s)
+    plan=loadPlan()
+  }
+}
 
-trait HomeSource extends Publisher {
+trait HomeSource extends Publisher with PlanWatcher {
   private[this] var p: Plan = null
   def plan: Plan = p
   def plan_= (x: Plan) {
