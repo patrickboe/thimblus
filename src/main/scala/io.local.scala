@@ -10,6 +10,13 @@ object Local {
       case ex: FileNotFoundException => throw PlanNotFoundException(ex)
     }
   }
+
+  def writerMaker(path: String) = () => {
+    if(!new File(path).exists) {
+      throw PlanNotFoundException(new FileNotFoundException("There is no plan file at "+path))
+    }
+    new FileWriter(path)
+  }
 }
 
 case class PlanNotFoundException(cause: Exception) extends Exception(cause)
