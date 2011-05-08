@@ -53,9 +53,26 @@ class PlanFormatSpec extends WordSpec with ShouldMatchers {
         assert(dateString=="\"20110315174022-0400\"", "unexpected value: "+ dateString)
       }
     }
-
   }
 
+  "Planex" when {
+    "passed a whole .plan file" should {
+      "return just the part after 'Plan:'" in {
+        val fullPlan = "something: something, eggs, milk sugar Plan:boogadaboogada"
+        val Planex(plan) = fullPlan
+        plan should equal ("boogadaboogada")
+      }
+      "trim out whitespace" in {
+        val fullPlan = "Plan:   R\n"
+        val Planex(plan) = fullPlan
+        plan should equal ("R")
+      }
+      "not match when there's no plan section" in {
+        intercept[MatchError]{ val Planex(plan) = "dolphins" }
+      }
+    }
+  }
+  
   "Domainex" when {
     "passed a multi-part name" should {
       "put the last part in the top field" in {

@@ -14,6 +14,15 @@ object Domainex {
   }
 }
 
+object Planex {
+  def unapply(str: String) = {
+    val ixPlanLabel = str indexOf "Plan:"
+    when(ixPlanLabel>=0) {
+      (str drop (ixPlanLabel+5)).trim
+    }
+  }
+}
+
 object Addressex {
   def unapply(str: String) = {
     val lastAt = str lastIndexOf "@"
