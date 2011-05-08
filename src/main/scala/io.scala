@@ -15,6 +15,14 @@ object IO {
       reader.close()
     }
   }
+
+  def streamify (string: String, writer: Writer) = {
+    try {
+      writer.write(string)
+    } finally {
+      writer.close()
+    }
+  }
 }
 
 // vim: set sw=2 set softtabstop=2 et:

@@ -7,7 +7,7 @@ import java.io._
 import org.thimblr.io.IO._
 
 class IOSpec extends WordSpec with ShouldMatchers {
-  "readToString" when {
+  "stringify" when {
     "passed a makeReader function" should {
       "return the full string from the reader it produces" in {
         val expected = "This is a test string"
@@ -24,6 +24,15 @@ class IOSpec extends WordSpec with ShouldMatchers {
     
     "receiving an exception from its reader" should {
       "close its reader and rethrow the exception" in {
+        val failReader = new Reader {
+          var onReadException = new IOException("failing on read by design")
+          override def close() = {
+            onReadException = new IOException("can't read because the reader is closed")  
+          }
+          override def read(cbuf: Array[Char],off: Int, len: Int): Int = {
+            throw onReadException
+          }
+        }
         val readException = intercept[IOException] { 
           stringify(failReader)
         }
@@ -34,17 +43,49 @@ class IOSpec extends WordSpec with ShouldMatchers {
           "reader is not throwing the expected IOException for a closed reader, so it's probably been left open.")
       }
     }
+
   }
 
-  val failReader = new Reader {
-    var onReadException = new IOException("failing on read by design")
-    override def close() = {
-      onReadException = new IOException("can't read because the reader is closed")  
+  "streamify" when {
+    "passed a string and a makeWriter function" should {
+      "write the string to the writer and close the writer" in {
+        val mockWriter = new Writer {
+          var writtenValue=""
+          var finalValue=""
+          override def close() = { 
+            finalValue = writtenValue 
+          }
+          override def flush() = {}
+          override def write(cbuf: Array[Char],off: Int, len: Int) = {
+            writtenValue=cbuf.mkString.trim
+          }
+        }
+
+        val test = "squishy"
+        streamify(test,mockWriter)
+        assert(test==mockWriter.finalValue, 
+          "expected \"" + test + "\" but got \"" + mockWriter.finalValue + "\"")
+      }
     }
-    override def read(cbuf: Array[Char],off: Int, len: Int): Int = {
-      throw onReadException
+
+    "receiving an exception from its writer" should {
+      "close the writer and rethrow the exception" in {
+        val failWriter = new Writer {
+          var isClosed=false
+          override def flush() = {}
+          override def close() = {
+            isClosed=true
+          }
+          override def write(cbuf: Array[Char],off: Int, len: Int) = {
+            throw new IOException("can't write by design")
+          }
+        }
+        intercept[IOException]{ streamify("test string",failWriter) }
+        assert(failWriter.isClosed)
+      }
     }
   }
+
 }
 
 // vim: set sw=2 set softtabstop=2 et:
