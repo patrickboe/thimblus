@@ -15,10 +15,13 @@ object Domainex {
 }
 
 object Planex {
+  def apply(metadata: String, plan: String) = {
+    String.format("%1$sPlan:\n%2$s", metadata, plan)
+  }
   def unapply(str: String) = {
     val ixPlanLabel = str indexOf "Plan:"
     when(ixPlanLabel>=0) {
-      (str drop (ixPlanLabel+5)).trim
+      (str take ixPlanLabel, (str drop (ixPlanLabel+5)).trim)
     }
   }
 }

@@ -57,18 +57,31 @@ class PlanFormatSpec extends WordSpec with ShouldMatchers {
 
   "Planex" when {
     "passed a whole .plan file" should {
-      "return just the part after 'Plan:'" in {
+      "extract just the part after 'Plan:', leaving the rest in metadata" in {
         val fullPlan = "something: something, eggs, milk sugar Plan:boogadaboogada"
-        val Planex(plan) = fullPlan
+        val Planex(metadata, plan) = fullPlan
         plan should equal ("boogadaboogada")
+        metadata should equal ("something: something, eggs, milk sugar ")
       }
+
       "trim out whitespace" in {
         val fullPlan = "Plan:   R\n"
-        val Planex(plan) = fullPlan
+        val Planex(metadata, plan) = fullPlan
         plan should equal ("R")
       }
+
       "not match when there's no plan section" in {
-        intercept[MatchError]{ val Planex(plan) = "dolphins" }
+        intercept[MatchError]{ val Planex(metadata,plan) = "dolphins" }
+      }
+    }
+
+    "applying a metadata, plan pair" should {
+      "put them in a string separated by 'Plan:\\n'" in {
+        val planString=Planex("some metadata about unicorns\n","Hunt gummy worms in bear forest.")
+        planString should equal (
+"""some metadata about unicorns
+Plan:
+Hunt gummy worms in bear forest.""")
       }
     }
   }
