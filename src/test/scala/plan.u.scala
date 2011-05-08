@@ -6,6 +6,7 @@ import org.scalatest.TestFailedException
 import java.util.Date
 import java.text.SimpleDateFormat
 import net.liftweb.json._
+import net.liftweb.json.Serialization.{read,write}
 import net.liftweb.json.JsonAST._
 import org.thimblr.Util._
 import org.thimblr.plan._
@@ -39,15 +40,17 @@ class PlanSpec extends WordSpec with ShouldMatchers {
 
   import Fixtures._
 
-  //convert a message pair to a message obj
-  //sort a list of addresses
-  //sort a list of messages
-  //build a plan from a sorted list of messages, a sorted list of followers, and an address
   "Follower" should {
     "match followers" in {
-      val jsonMsg = parse("""{"address": "123 Brown Street"}""")
-      val f = jsonMsg.extract[Follower]
+      val f = read[Follower]("""{"address": "123 Brown Street"}""")
       assert(f.address=="123 Brown Street")
+    }
+
+    "serialize reversibly to a string" in {
+      val f = Follower("bob@twpks.gov")
+      val json = write(f)
+      val doubleParsed = read[Follower](json)
+      assert(f==doubleParsed)
     }
   }
 
@@ -60,19 +63,32 @@ class PlanSpec extends WordSpec with ShouldMatchers {
         "expected time value " + mockingTime + 
         ", got " +  m.time)
     }
+    
+    "serialize reversibly to a string" in {
+      val m = Message("test message", mockingTime)
+      val json = write(m)
+      val doubleParsed = read[Message](json)
+      assert(m==doubleParsed)
+    }
   }
 
   "Plan" should {
-    "match a plan" in {
-      val p=parse(testPlan).extract[Plan]
+    val p=read[Plan](testPlan)
+
+    "match a string" in {
       assert(p.address=="worldwide@phila.gov")
       assert(p.following.length==2)
       assert(p.messages.length==3)
       assert(p.following.head==Follower("djjz@wphila.pa.state.gov"))
       assert(p.messages.head== Message( "I'm risin' to the shine",  mockingTime))
     }
-  }
 
+    "serialize reversibly to a string" in {
+      val planString=write(p)
+      val doubleParsed=read[Plan](planString)
+      assert(doubleParsed==p)
+    }
+  }
 }
 
 // vim: set sw=2 set softtabstop=2 et:

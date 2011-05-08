@@ -4,11 +4,14 @@ import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.TestFailedException
 import net.liftweb.json._
+import net.liftweb.json.Serialization.write
 import java.util.{Locale,Calendar,TimeZone,Date}
 import org.thimblr.Util._
-import org.thimblr.plan.Format._
+import org.thimblr.plan._
 
 class PlanFormatSpec extends WordSpec with ShouldMatchers {
+  implicit val formats = new ThimblrFormats(TimeZone.getTimeZone("America/New_York"))
+
   "Date" when {
     val nyc = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"),Locale.US)
     val chi = Calendar.getInstance(TimeZone.getTimeZone("America/Chicago"),Locale.US)
@@ -26,19 +29,31 @@ class PlanFormatSpec extends WordSpec with ShouldMatchers {
           nyc.get(Calendar.SECOND)==22)
       }
 
-      "match the time minus five hours if you're in Chicago" in {
+      "match the time minus five hours on a Chicago calendar" in {
         chi.setTime(d)
         assert(chi.get(Calendar.HOUR_OF_DAY)==9)
       }
-    }
 
-    "extracted in New York from a New York zone-adjusted string" should {
-      "match the time exactly" in {
-        val d = parse("[\"20110315144022-0400\"]")(0).extract[Date]
-        nyc.setTime(d)
-        assert(nyc.get(Calendar.HOUR_OF_DAY)==14)
+      "serialize to a time zone adjusted string" in {
+        val dateString = write(d)
+        assert(dateString=="\"20110315104022-0400\"", "unexpected value: "+ dateString)
       }
     }
+
+    "extracted in New York from a San Francisco zone-adjusted string" should {
+      val d = parse("[\"20110315144022-0700\"]")(0).extract[Date]
+
+      "match the time three hours later" in {
+        nyc.setTime(d)
+        assert(nyc.get(Calendar.HOUR_OF_DAY)==17)
+      }
+
+      "serialize to a time zone adjusted string" in {
+        val dateString = write(d)
+        assert(dateString=="\"20110315174022-0400\"", "unexpected value: "+ dateString)
+      }
+    }
+
   }
 
   "Domainex" when {

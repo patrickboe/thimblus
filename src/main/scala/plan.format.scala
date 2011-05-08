@@ -5,40 +5,33 @@ import java.util.{Date,TimeZone}
 import java.text.SimpleDateFormat
 import net.liftweb.json._
 
-object Format {
-
-  implicit val formats = new ThimblrFormats()
-
-  object Domainex {
-    def unapply(str: String) = {
-      val lastDot = str lastIndexOf "."
-      when(lastDot>0) { 
-        str/lastDot 
-      }
+object Domainex {
+  def unapply(str: String) = {
+    val lastDot = str lastIndexOf "."
+    when(lastDot>0) { 
+      str/lastDot 
     }
   }
-
-  object Addressex {
-    def unapply(str: String) = {
-      val lastAt = str lastIndexOf "@"
-      Some {
-        if(lastAt>0)
-          str/lastAt 
-        else 
-          (str, None)
-      }
-    }
-  }
-
 }
 
-class ThimblrFormats extends Formats {
+object Addressex {
+  def unapply(str: String) = {
+    val lastAt = str lastIndexOf "@"
+    Some {
+      if(lastAt>0)
+        str/lastAt 
+      else 
+        (str, None)
+    }
+  }
+}
+
+class ThimblrFormats(userZone: TimeZone) extends Formats {
   
-  private val full=new SimpleDateFormat("yyyyMMddHHmmssz")
+  private val full=new SimpleDateFormat("yyyyMMddHHmmssZ")
   private val lenient=new SimpleDateFormat("yyyyMMddHHmmss")
-  private val utc=TimeZone.getTimeZone("UTC")
-  full.setTimeZone(utc)
-  lenient.setTimeZone(utc)
+  full.setTimeZone(userZone)
+  lenient.setTimeZone(TimeZone.getTimeZone("UTC"))
 
   val dateFormat = new net.liftweb.json.DateFormat {    
     def parse(s: String) = try {
