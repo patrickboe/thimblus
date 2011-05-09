@@ -11,10 +11,11 @@ case class Dispatch(view: View, model: HomeModel){
   }
 }
 
-trait View {
+trait View extends Reactor {
   val model: HomeSource
   val post: Publisher
   val message: TextComponent
+  listenTo(model)
 }
 
 // vim: set sw=2 set softtabstop=2 et:

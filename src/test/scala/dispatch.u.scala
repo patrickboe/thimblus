@@ -16,11 +16,12 @@ class UISuite extends WordSpec with ShouldMatchers {
       var posted = ""
       val expected = "My Next Post..."
       val mockModel = new HomeModel(s => posted = s, ()=>null)
-      val mockView = new View { 
-        val model = mockModel
-        val post = new Button()
-        val message = new TextField(expected)
-      }
+      val mockView = new {
+          val model = mockModel
+        } with View { 
+          val post = new Button()
+          val message = new TextField(expected)
+        }
       val dispatch = Dispatch(mockView,mockModel)
       dispatch(ButtonClicked(mockView.post))
       posted should equal (expected)
@@ -51,6 +52,24 @@ class UISuite extends WordSpec with ShouldMatchers {
       val subject = new HomeModel(testVal=_,()=>null)
       subject.post(expected)
       testVal should equal (expected)
+    }
+  }
+
+  "View" should {
+    "subscribe to events on the model" in {
+      object mockSource extends HomeSource
+      val view = new { 
+          val model = mockSource 
+        } with View {
+          val post = null
+          val message = null
+          var noticedPlanUpdate = false
+          reactions += {
+            case PlanUpdate(`model`)=>noticedPlanUpdate=true  
+        }
+      }
+      mockSource.publish(PlanUpdate(mockSource))
+      assert(view.noticedPlanUpdate)
     }
   }
   
