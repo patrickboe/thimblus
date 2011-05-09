@@ -23,7 +23,7 @@ class UISuite extends WordSpec with ShouldMatchers {
           val message = new TextField(expected)
         }
       val dispatch = Dispatch(mockView,mockModel)
-      dispatch(ButtonClicked(mockView.post))
+      mockView.post.doClick
       posted should equal (expected)
       mockView.message.text should equal ("")
     }
