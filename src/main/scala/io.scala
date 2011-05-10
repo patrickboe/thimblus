@@ -16,7 +16,8 @@ object IO {
     }
   }
 
-  def streamify (string: String, writer: Writer) = {
+  def streamify (string: String, planWriter: =>Writer) = {
+    val writer = new BufferedWriter(planWriter)
     try {
       writer.write(string)
     } finally {
