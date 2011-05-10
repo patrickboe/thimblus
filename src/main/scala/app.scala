@@ -2,12 +2,28 @@ package org.thimblr.swing
 
 import org.thimblr.model.HomeModel
 import org.thimblr.ui.Dispatch
+import org.thimblr.io.Local._
 
 object App extends {
-  val model = new HomeModel(
-    s=>Unit,
-    ()=>null
-  )
+  private val planPath=".plan"
+  private val planSource=readerMaker(planPath)
+  private val planTarget=writerMaker(planPath)
+
+  val model = new HomeModel(poster=(a,b,c)=>(),()=>(null,null))
+
+    /*
+    poster = (metadata,plan,post)=>{
+      val newPlan=postTo(plan,post)
+      streamify(Planex(metadata,newPlan),planTarget)
+    },
+
+    loadPlan = {
+      val Planex(metadata, plan) = stringify(planSource))
+      (metadata,plan)
+    }
+    */
+
+
 } with SwingView {
   Dispatch(this,model)
 }

@@ -15,7 +15,7 @@ class UISuite extends WordSpec with ShouldMatchers {
     "call model.post in response to a post button click event" in {
       var posted = ""
       val expected = "My Next Post..."
-      val mockModel = new HomeModel(s => posted = s, ()=>null)
+      val mockModel = new HomeModel((x,y,s) => posted = s, ()=>(null,null))
       val mockView = new {
           val model = mockModel
         } with View { 
@@ -30,28 +30,45 @@ class UISuite extends WordSpec with ShouldMatchers {
   }
 
   "HomeModel" should {
-    "load the current plan on creation" in {
+    "load the current plan and metadata on creation" in {
       val tastyPlan=Plan("tasty@burgers.com",null,null)
-      val loadPlan=()=>tastyPlan
-      val subject=new HomeModel(s=>Unit,loadPlan)
+      val yumData="Contents of drawer: a dozen donuts"
+      val loadPlan=()=>(yumData,tastyPlan)
+      val subject=new HomeModel((x,y,z)=>Unit,loadPlan)
       subject.plan should equal (tastyPlan)
+      subject.metadata should equal (yumData)
     }
 
-    "load the latest plan after a post" in {
+    "load the latest plan, but don't load metadata, after a post" in {
       var plan=Plan("one@test.com",null,null)
-      val loadPlan=()=>plan
-      val subject=new HomeModel(s=>Unit,loadPlan)
+      var metadata="first metadata"
+      val loadPlan=()=>(metadata,plan)
+      val subject=new HomeModel((x,y,z)=>Unit,loadPlan)
       plan=Plan("two@test.com",null,null)
+      metadata="second metadata"
       subject.post("blah")
       subject.plan should equal(plan)
+      subject.metadata should equal ("first metadata")
     }
 
     "call its poster when post is called on it" in {
-      var testVal = ""
-      val expected ="bees are a beneficial animal"
-      val subject = new HomeModel(testVal=_,()=>null)
-      subject.post(expected)
-      testVal should equal (expected)
+      var called=false
+      val expectedPost ="bees are a beneficial animal"
+      val expectedMetadata = "some people hate bees"
+      val expectedPlan = Plan("wasp@hive.net",null,null)
+      val subject = new HomeModel(
+        (metadata,plan,post)=>
+        {
+          called=true
+          post should equal(expectedPost)
+          plan should equal(expectedPlan)
+          metadata should equal (expectedMetadata)
+        },
+        ()=>(null,null))
+      subject.metadata=expectedMetadata
+      subject.plan=expectedPlan
+      subject.post(expectedPost)
+      assert(called)
     }
   }
 

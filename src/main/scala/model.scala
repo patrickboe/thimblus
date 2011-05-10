@@ -4,12 +4,15 @@ import scala.swing._
 import scala.swing.event._
 import org.thimblr.plan._
 
-class HomeModel(poster: (String)=>Unit, loadPlan: ()=>Plan) extends HomeSource {
-  plan=loadPlan()
+class HomeModel(poster: (String,Plan,String)=>Unit, planLoader: ()=>(String,Plan)) extends HomeSource {
+  var metadata: String=null
+  planLoader() match { case (x,y) => { metadata=x; plan=y; } }
+
   def post(s: String) = {
-    poster(s)
-    plan=loadPlan()
+    poster(metadata,plan,s)
+    planLoader() match { case (x,y) => { plan=y } }
   }
+
 }
 
 trait HomeSource extends Publisher with PlanWatcher {
