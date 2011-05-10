@@ -1,6 +1,6 @@
-package org.thimblr.plan
+package org.thimblus.plan
 
-import org.thimblr.Util._
+import org.thimblus.Util._
 import java.util.{Date,TimeZone}
 import java.text.SimpleDateFormat
 import net.liftweb.json._
@@ -38,7 +38,7 @@ object Addressex {
   }
 }
 
-class ThimblrFormats(userZone: TimeZone) extends Formats {
+class ThumblusFormats(userZone: TimeZone) extends Formats {
   
   private val full=new SimpleDateFormat("yyyyMMddHHmmssZ")
   private val lenient=new SimpleDateFormat("yyyyMMddHHmmss")

@@ -1,11 +1,11 @@
-package org.thimblr.test.aggregation
+package org.thimblus.test.aggregation
 
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.TestFailedException
 import java.util.Date
-import org.thimblr.plan._
-import org.thimblr.Aggregation._
+import org.thimblus.plan._
+import org.thimblus.Aggregation._
 
 class AggregationSuite extends WordSpec with ShouldMatchers {
   "sort" should {

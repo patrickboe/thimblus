@@ -1,9 +1,9 @@
-package org.thimblr.test.io
+package org.thimblus.test.io
 
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import java.io._
-import org.thimblr.io._
+import org.thimblus.io._
 import java.util.UUID
 
 class PlanFileSpec extends WordSpec with ShouldMatchers {

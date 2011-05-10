@@ -1,8 +1,8 @@
-package org.thimblr.model
+package org.thimblus.model
 
 import scala.swing._
 import scala.swing.event._
-import org.thimblr.plan._
+import org.thimblus.plan._
 
 class HomeModel(poster: (String,Plan,String)=>Unit, planLoader: ()=>(String,Plan)) extends HomeSource {
   var metadata: String=null

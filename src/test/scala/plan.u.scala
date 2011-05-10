@@ -1,4 +1,4 @@
-package org.thimblr.test.plan
+package org.thimblus.test.plan
 
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -8,8 +8,8 @@ import java.text.SimpleDateFormat
 import net.liftweb.json._
 import net.liftweb.json.Serialization.{read,write}
 import net.liftweb.json.JsonAST._
-import org.thimblr.Util._
-import org.thimblr.plan._
+import org.thimblus.Util._
+import org.thimblus.plan._
 
 class PlanSpec extends WordSpec with ShouldMatchers {
 

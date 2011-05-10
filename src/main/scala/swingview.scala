@@ -1,18 +1,18 @@
-package org.thimblr.swing
+package org.thimblus.swing
 
 import scala.swing._
-import org.thimblr.model._
+import org.thimblus.model._
 
 trait SwingView
   extends SimpleSwingApplication 
-  with org.thimblr.ui.View {
+  with org.thimblus.ui.View {
 
   val myPosts = new TextArea
   val post = new Button { text = "post" }
   val message = new TextField
   
   def top = new MainFrame {
-    title = "Thimblr"
+    title = "Thumblus"
     contents = new BoxPanel(Orientation.Vertical) {
       contents += message
       contents += post

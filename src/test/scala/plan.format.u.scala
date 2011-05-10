@@ -1,4 +1,4 @@
-package org.thimblr.test.plan
+package org.thimblus.test.plan
 
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -6,11 +6,11 @@ import org.scalatest.TestFailedException
 import net.liftweb.json._
 import net.liftweb.json.Serialization.write
 import java.util.{Locale,Calendar,TimeZone,Date}
-import org.thimblr.Util._
-import org.thimblr.plan._
+import org.thimblus.Util._
+import org.thimblus.plan._
 
 class PlanFormatSpec extends WordSpec with ShouldMatchers {
-  implicit val formats = new ThimblrFormats(TimeZone.getTimeZone("America/New_York"))
+  implicit val formats = new ThumblusFormats(TimeZone.getTimeZone("America/New_York"))
 
   "Date" when {
     val nyc = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"),Locale.US)

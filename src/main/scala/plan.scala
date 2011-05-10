@@ -1,6 +1,6 @@
-package org.thimblr.plan
+package org.thimblus.plan
 
-import org.thimblr.Util._
+import org.thimblus.Util._
 import java.util.Date
 import net.liftweb.json._
 import net.liftweb.json.JsonParser._

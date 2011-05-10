@@ -1,5 +1,5 @@
-package org.thimblr
-import org.thimblr.plan._
+package org.thimblus
+import org.thimblus.plan._
 
 object Aggregation {
 

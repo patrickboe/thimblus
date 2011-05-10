@@ -1,4 +1,4 @@
-package org.thimblr.io
+package org.thimblus.io
 
 import java.io._
 

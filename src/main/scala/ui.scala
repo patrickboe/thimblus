@@ -1,8 +1,8 @@
-package org.thimblr.ui
+package org.thimblus.ui
 
 import scala.swing._
 import scala.swing.event._
-import org.thimblr.model._
+import org.thimblus.model._
 
 case class Dispatch(view: View, model: HomeModel) extends Reactor {
   listenTo(view.post)

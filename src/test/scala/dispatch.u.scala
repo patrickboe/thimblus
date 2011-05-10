@@ -1,4 +1,4 @@
-package org.thimblr.test.ui
+package org.thimblus.test.ui
 
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -6,9 +6,9 @@ import org.scalatest.TestFailedException
 import java.util.Date
 import scala.swing._
 import scala.swing.event._
-import org.thimblr.ui._
-import org.thimblr.model._
-import org.thimblr.plan._
+import org.thimblus.ui._
+import org.thimblus.model._
+import org.thimblus.plan._
 
 class UISuite extends WordSpec with ShouldMatchers {
   "Dispatch" should {

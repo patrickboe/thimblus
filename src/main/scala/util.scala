@@ -1,4 +1,4 @@
-package org.thimblr {
+package org.thimblus {
 
   object Util {
 

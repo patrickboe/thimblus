@@ -1,10 +1,10 @@
-package org.thimblr.test.plan
+package org.thimblus.test.plan
 
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.TestFailedException
 import java.io._
-import org.thimblr.io.IO._
+import org.thimblus.io.IO._
 
 class IOSpec extends WordSpec with ShouldMatchers {
   "stringify" when {
