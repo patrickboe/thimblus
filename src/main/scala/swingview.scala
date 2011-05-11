@@ -27,7 +27,9 @@ trait SwingView
   extends SimpleSwingApplication 
   with org.thimblus.ui.View {
 
-  val myPosts = new TextArea
+  val myPosts = new TextArea { 
+    text = readMyPosts
+  }
   val post = new Button { text = "post" }
   val message = new TextField
   
@@ -38,6 +40,13 @@ trait SwingView
       contents += post
       contents += myPosts
     }
+  }
+
+  private def readMyPosts = 
+    (for( m <- model.plan.messages) yield m.text).mkString("\n")
+
+  reactions += {
+    case PlanUpdate(`model`) => myPosts.text=readMyPosts
   }
 }
 
