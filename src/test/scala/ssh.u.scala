@@ -86,4 +86,4 @@ class SSHSpec extends WordSpec with ShouldMatchers {
   }
 }
 
-// vim: set sw=2 set softtabstop=2 et:
+// vim: sw=2:softtabstop=2:et:

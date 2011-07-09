@@ -7,4 +7,4 @@ class ThimblusProject(info: ProjectInfo) extends DefaultProject(info)
  val scalaTest = "org.scalatest" % "scalatest_2.8.1" % "1.5"
 }
 
-// vim: set sw=2 set softtabstop=2 et:
+// vim: sw=2:softtabstop=2:et:

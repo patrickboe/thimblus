@@ -46,4 +46,4 @@ trait HomeSource extends Publisher with PlanWatcher {
 
 case class PlanUpdate(source: HomeSource) extends Event
 
-// vim: set sw=2 set softtabstop=2 et:
+// vim: sw=2:softtabstop=2:et:

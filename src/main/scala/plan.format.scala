@@ -79,4 +79,4 @@ class ThumblusFormats(userZone: TimeZone) extends Formats {
     def format(d: Date) = full.format(d)
   }
 }
-// vim: set sw=2 set softtabstop=2 et:
+// vim: sw=2:softtabstop=2:et:
