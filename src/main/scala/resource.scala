@@ -19,6 +19,9 @@
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.thimblus.io
+
+import java.io._
+
 object ResourceControl {
     def using[A,R<:Resource](r : R)(f : R=>A) : A =
       try{
@@ -31,3 +34,6 @@ object ResourceControl {
 trait Resource {
     def dispose(): Unit
 }
+
+trait DisposableReader extends Reader with Resource
+trait DisposableWriter extends Writer with Resource
