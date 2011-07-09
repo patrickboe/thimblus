@@ -18,17 +18,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.ssh
-
-case class SSHConnector(hostname: String, username: String, keypath: String, pass: String);
-
-object SSH{
-  def keycheck(filecheck: String=>Boolean) = {
-    ((filecheck("~/.ssh/id_rsa") &&
-    filecheck("~/.ssh/id_rsa.pub")) ||
-    (filecheck("~/.ssh/id_dsa") &&
-    filecheck("~/.ssh/id_dsa.pub"))) && 
-    filecheck("~/.ssh/known_hosts")
-  }
+package org.thimblus.io
+object ResourceControl {
+    def using[A,R<:Resource](r : R)(f : R=>A) : A =
+      try{
+        f(r)
+      } finally {
+        r.dispose()
+      }
 }
-// vim: set sw=2 set softtabstop=2 et:
+
+trait Resource {
+    def dispose(): Unit
+}

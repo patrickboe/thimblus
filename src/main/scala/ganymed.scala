@@ -18,17 +18,33 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.ssh
+package org.thimblus.io
 
-case class SSHConnector(hostname: String, username: String, keypath: String, pass: String);
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
-object SSH{
-  def keycheck(filecheck: String=>Boolean) = {
-    ((filecheck("~/.ssh/id_rsa") &&
-    filecheck("~/.ssh/id_rsa.pub")) ||
-    (filecheck("~/.ssh/id_dsa") &&
-    filecheck("~/.ssh/id_dsa.pub"))) && 
-    filecheck("~/.ssh/known_hosts")
-  }
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
+import ch.ethz.ssh2.StreamGobbler;
+import org.thimblus.ssh._;
+
+object Ganymed {
+  def readerMaker(connector: SSHConnector, path: String) = () => {
+        val c=new Connection(connector.hostname)
+        c.connect()
+        val keyfile=new File(connector.keypath)
+        if(!c.authenticateWithPublicKey(connector.username,keyfile,connector.pass)){
+            //throw something    
+        }
+        val session = c.openSession
+        session.execCommand("cat " + path)
+        val out = new StreamGobbler(session.getStdout)
+        val err = new StreamGobbler(session.getStderr)
+        session.close()
+        c.close()
+    }
 }
 // vim: set sw=2 set softtabstop=2 et:

@@ -49,6 +49,16 @@ class SSHSpec extends WordSpec with ShouldMatchers {
         assert(keycheck(filecheck))
       }
     }
+    "there are valid keys for dsa" should {
+      "return true" in {
+        val filecheck = (name: String) => { 
+          name=="~/.ssh/id_dsa" || 
+          name=="~/.ssh/id_dsa.pub" ||
+          name=="~/.ssh/known_hosts"
+        }
+        assert(keycheck(filecheck))
+      }
+    }
     "missing private keys" should {
       "return false" in {
         val missingPriv = (s: String) => {
