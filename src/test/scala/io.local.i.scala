@@ -24,6 +24,7 @@ import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import java.io._
 import org.thimblus.io._
+import org.thimblus.io.IO._
 import java.util.UUID
 
 class PlanFileSpec extends WordSpec with ShouldMatchers {
@@ -36,16 +37,13 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
       "return a lazy writer for the file in that path" in {
         val expected = "This is a unique test: " + UUID.randomUUID()
         val makeWriter = Local.writerMaker(path)
-        val planWriter = makeWriter()
-        try{
-          planWriter.write(expected)
-        } finally { 
-          planWriter.close()
-        }
+        using(makeWriter()) { w =>
+          w.write(expected)
+        } 
         val testReader = new FileReader(path)
         try{
           val actual = Stream
-                        .continually(testReader.read)
+                        .continually(testReader.read())
                         .takeWhile(_ != -1)
                         .map(_.toChar)
                         .mkString
@@ -90,18 +88,15 @@ Of text."""
 """This file
 Has three lines
 Of text.YEAAAAAAAAAA!"""
-        val planReader = makeReader()
-        try {
+        using(makeReader()) { r =>
           val actual = Stream
-                        .continually(planReader.read)
+                        .continually(r.read())
                         .takeWhile(_ != -1)
                         .map(_.toChar)
                         .mkString
           assert(actual == expected,
             "\n" + actual + " should have been\n" + expected + " but was not.")
-        } finally {
-          planReader.close()
-        }
+        } 
       }
     }
     

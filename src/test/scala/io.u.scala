@@ -27,6 +27,45 @@ import java.io._
 import org.thimblus.io.IO._
 
 class IOSpec extends WordSpec with ShouldMatchers {
+  "using" when {
+    val closeable = () => new StringReader("test")
+
+    "there is an error" should {
+      "run its function and dispose" in {
+        val cl = closeable()
+        var started=false
+        var finished=false
+        intercept[Exception] {
+          using(cl) { d =>
+            started=true
+            throw new Exception
+            finished=true
+          }
+        }
+        started should be (true)
+        finished should be (false)
+        intercept[IOException]{
+          cl.read()
+        } 
+      }
+    }
+
+    "there is no error" should {
+      "run its function and dispose" in {
+        val cl = closeable()
+        var ran=false
+        using(cl) { d =>
+          cl.read()
+          ran=true
+        }
+        ran should be (true)
+        intercept[IOException]{
+          cl.read()
+        } 
+      }
+    }
+  }
+
   "stringify" when {
     "passed a makeReader function" should {
       "return the full string from the reader it produces" in {

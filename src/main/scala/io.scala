@@ -44,6 +44,14 @@ object IO {
       writer.close()
     }
   }
+
+  def using[A,R<:Closeable](r : R)(f : R=>A) : A = {
+    try{
+      f(r)
+    } finally {
+      r.close()
+    }
+  }
 }
 
 // vim: sw=2:softtabstop=2:et:
