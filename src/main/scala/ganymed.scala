@@ -20,31 +20,50 @@
  */
 package org.thimblus.io
 
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
+import java.io._;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 import org.thimblus.ssh._;
 
 object Ganymed {
-  def readerMaker(connector: SSHConnector, path: String) = () => {
-        val c=new Connection(connector.hostname)
-        c.connect()
+  def readerMaker(connector: SSHConnector, path: String, errorStreamHandler: GanymedReader=>Unit) = 
+    () => {
+        val connection=new Connection(connector.hostname)
+        connection.connect()
         val keyfile=new File(connector.keypath)
-        if(!c.authenticateWithPublicKey(connector.username,keyfile,connector.pass)){
-            //throw something    
+        if(!connection.authenticateWithPublicKey(connector.username,keyfile,connector.pass)){
+            connection.close()
+            throw new IOException("connected but failed to authenticate")
         }
-        val session = c.openSession
+        val session = connection.openSession
         session.execCommand("cat " + path)
-        val out = new StreamGobbler(session.getStdout)
-        val err = new StreamGobbler(session.getStderr)
-        session.close()
-        c.close()
+        val ganyReaderFrom = (f: Session=>InputStream) => {
+          new GanymedReader(new InputStreamReader(new StreamGobbler(f(session))),session,connection)
+        }
+        errorStreamHandler(ganyReaderFrom(s=>s.getStderr))
+        ganyReaderFrom(s=>s.getStdout)
     }
+}
+
+class GanymedReader(remoteReader: Reader, session: Session, connection: Connection) 
+extends Reader with Closeable {
+  def read(a: Array[Char],b: Int,c: Int)=remoteReader.read(a,b,c)
+  def close()={
+    remoteReader.close()
+    session.close()
+    connection.close()
+  }
+}
+
+class GanymedWriter(remoteWriter: Writer, session: Session, connection: Connection) 
+extends Writer with Closeable {
+  def write(a: Array[Char],b: Int,c: Int)=remoteWriter.write(a,b,c)
+  def flush()=remoteWriter.flush()
+  def close()={
+    remoteWriter.close()
+    session.close()
+    connection.close()
+  }
 }
 // vim: sw=2:softtabstop=2:et:
