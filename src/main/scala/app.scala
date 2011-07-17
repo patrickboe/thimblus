@@ -32,7 +32,7 @@ import org.thimblus.plan._
 object App extends {
   private val planPath="src/test/resources/testplans/.plan"
   private val planSource=readerMaker(planPath)
-  private val planTarget=writerMaker(planPath)
+  private val planTarget=recorderMaker(planPath)
   private val thimblusFormats= new ThumblusFormats(TimeZone.getDefault())
 
   val model = new HomeModel(
@@ -40,7 +40,7 @@ object App extends {
     poster = (metadata,plan,post)=>{
       implicit val formats=thimblusFormats
       val newPlan=plan + post
-      streamify(Planex(metadata, write(newPlan)), planTarget())
+      planTarget().record(Planex(metadata, write(newPlan)))
     },
 
     planLoader = () => {

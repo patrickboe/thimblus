@@ -24,7 +24,7 @@ import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import java.io._
 import org.thimblus.io._
-import org.thimblus.io.IO._
+import IO._
 import java.util.UUID
 
 class PlanFileSpec extends WordSpec with ShouldMatchers {
@@ -32,14 +32,12 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
   val badpath = "src/test/resources/testplans/.plan.missing"
   new File(path).createNewFile()
   
-  "writerMaker" when {
+  "recorderMaker" when {
     "called with a valid path" should {
       "return a lazy writer for the file in that path" in {
         val expected = "This is a unique test: " + UUID.randomUUID()
-        val makeWriter = Local.writerMaker(path)
-        using(makeWriter()) { w =>
-          w.write(expected)
-        } 
+        val makeRecorder = Local.recorderMaker(path)
+        makeRecorder().record(expected)
         val testReader = new FileReader(path)
         try{
           val actual = Stream
@@ -56,7 +54,7 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
 
     "called with an invalid path" should {
       "throw a corresponding PlanNotFound exception" in {
-        val makeWriter=Local.writerMaker(badpath)
+        val makeWriter=Local.recorderMaker(badpath)
         val ex = intercept[PlanNotFoundException] {
           val planWriter=makeWriter()
         }

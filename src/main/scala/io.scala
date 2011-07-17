@@ -22,6 +22,8 @@ package org.thimblus.io
 
 import java.io._
 
+trait Recorder { def record(content: String) }
+
 object IO { 
   def stringify (planReader: => Reader) = {
     val reader = new BufferedReader(planReader)

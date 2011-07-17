@@ -31,11 +31,15 @@ object Local {
     }
   }
 
-  def writerMaker(path: String) = () => {
+  def recorderMaker(path: String) = () => {
     if(!new File(path).exists) {
       throw PlanNotFoundException(new FileNotFoundException("There is no plan file at "+path))
     }
-    new FileWriter(path)
+    new Recorder{ def record(content: String) = { 
+      val w=new FileWriter(path)
+      w.write(content)
+      w.close()
+    }}
   }
 }
 
