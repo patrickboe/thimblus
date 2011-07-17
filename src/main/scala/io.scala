@@ -22,28 +22,20 @@ package org.thimblus.io
 
 import java.io._
 
-trait Recorder { def record(content: String) }
-
 object IO { 
-  def stringify (planReader: => Reader) = {
-    val reader = new BufferedReader(planReader)
-    try {
+  def stringify (reader: Reader) = {
+    using(new BufferedReader(reader)) { br=>
       Stream
-        .continually(reader.read)
+        .continually(br.read)
         .takeWhile(_ != -1)
         .map(_.toChar)
         .mkString
-    } finally {
-      reader.close()
     }
   }
 
-  def streamify (string: String, planWriter: =>Writer) = {
-    val writer = new BufferedWriter(planWriter)
-    try {
-      writer.write(string)
-    } finally {
-      writer.close()
+  def streamify (string: String, writer: Writer) = {
+    using(new BufferedWriter(writer)) { bw=>
+      bw.write(string)
     }
   }
 

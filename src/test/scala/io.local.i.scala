@@ -36,8 +36,8 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
     "called with a valid path" should {
       "return a lazy writer for the file in that path" in {
         val expected = "This is a unique test: " + UUID.randomUUID()
-        val makeRecorder = Local.recorderMaker(path)
-        makeRecorder().record(expected)
+        val record = Local.makeRecorder(path)(_)
+        record(expected)
         val testReader = new FileReader(path)
         try{
           val actual = Stream
@@ -54,9 +54,9 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
 
     "called with an invalid path" should {
       "throw a corresponding PlanNotFound exception" in {
-        val makeWriter=Local.recorderMaker(badpath)
+        val record=Local.makeRecorder(badpath)(_)
         val ex = intercept[PlanNotFoundException] {
-          val planWriter=makeWriter()
+          val planWriter=record("test")
         }
         val cause = ex.getCause
         assert(cause.getMessage == "There is no plan file at " + badpath)
@@ -79,30 +79,24 @@ Has three lines
 Of text."""
           )
         } finally { overwriter.close() }
-        val makeReader = Local.readerMaker(path)
+        val load= Local.makeLoader(path)
         val appender = new FileWriter(path,true)
         try { appender.write("YEAAAAAAAAAA!") } finally { appender.close() }
         val expected =
 """This file
 Has three lines
 Of text.YEAAAAAAAAAA!"""
-        using(makeReader()) { r =>
-          val actual = Stream
-                        .continually(r.read())
-                        .takeWhile(_ != -1)
-                        .map(_.toChar)
-                        .mkString
-          assert(actual == expected,
-            "\n" + actual + " should have been\n" + expected + " but was not.")
-        } 
+        val actual=load()
+        assert(actual == expected,
+          "\n" + actual + " should have been\n" + expected + " but was not.")
       }
     }
     
     "called with an invalid path" should {
       "throw a corresponding PlanNotFound exception" in {
-        val makeReader=Local.readerMaker(badpath)
+        val load=Local.makeLoader(badpath)
         val ex = intercept[PlanNotFoundException] {
-          val planReader=makeReader()
+          val contents=load()
         }
         val cause = ex.getCause
         assert(cause.isInstanceOf[FileNotFoundException])

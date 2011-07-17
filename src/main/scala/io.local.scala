@@ -21,25 +21,22 @@
 package org.thimblus.io
 
 import java.io._
+import org.thimblus.io.IO._
 
 object Local {
-  def readerMaker(path: String) = () => {
+  def makeLoader(path: String) = () => {
     try {
-      new FileReader(path)
+      stringify(new FileReader(path))
     } catch { 
       case ex: FileNotFoundException => throw PlanNotFoundException(ex)
     }
   }
 
-  def recorderMaker(path: String) = () => {
+  def makeRecorder(path: String)(content: String) = { 
     if(!new File(path).exists) {
       throw PlanNotFoundException(new FileNotFoundException("There is no plan file at "+path))
     }
-    new Recorder{ def record(content: String) = { 
-      val w=new FileWriter(path)
-      w.write(content)
-      w.close()
-    }}
+    streamify(content,new FileWriter(path))
   }
 }
 
