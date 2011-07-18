@@ -68,7 +68,7 @@ class PlanFileSpec extends WordSpec with ShouldMatchers {
     }
   }
 
-  "readerMaker" when {
+  "makeLoader" when {
     "called with a valid path" should {
       "return a lazy reader from the file in that path" in {
         val overwriter = new FileWriter(path)

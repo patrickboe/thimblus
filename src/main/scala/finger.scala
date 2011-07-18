@@ -21,42 +21,25 @@
 package org.thimblus.io
 
 import java.io._
-import java.nio.charset._
+import java.net._
+import org.thimblus.io._
+import IO._
 
-object IO { 
-  def stringify (reader: Reader) = {
-    using(new BufferedReader(reader)) { br=>
-      Stream
-        .continually(br.read)
-        .takeWhile(_ != -1)
-        .map(_.toChar)
-        .mkString
-    }
-  }
-
-  def streamify (string: String, writer: Writer) = {
-    using(new BufferedWriter(writer)) { bw=>
-      bw.write(string)
-      bw.flush()
-    }
-  }
-
-  def using[A,R<:Closeable](r : R)(f : R=>A) : A = {
+object Finger {
+  def makeFingerer(connector: FingerConnector)(implicit cs: ThimblCharset) = () => {
+    val addr = InetAddress.getByName(connector.host)
+    val sock = new Socket(addr, 79)
     try{
-      f(r)
-    } finally {
-      r.close()
-    }
+      using(new InputStreamReader(sock.getInputStream(),cs.charset)) { reader=>
+        using(new OutputStreamWriter(sock.getOutputStream(),cs.charset)) { writer =>
+          streamify(connector.user+"\r\n",writer)
+          stringify(reader)
+        }
+      }
+    } finally { sock.close() }
   }
 }
 
-case class ThimblCharset(charset: Charset)
+case class FingerConnector(user: String, host: String)
 
-case class Path(file: String, directory: String)
-
-trait Destination extends Path {
-  def pickle(s: String): Array[Byte]
-  val mode: String
-} 
-
-// vim: sw=2:softtabstop=2:et:
+// vim: sw=2:softtabstop=2:et
