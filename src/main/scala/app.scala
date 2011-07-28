@@ -28,6 +28,7 @@ import org.thimblus.ui.Dispatch
 import org.thimblus.io.Local._
 import org.thimblus.io.IO._
 import org.thimblus.plan._
+import scala.swing.SimpleSwingApplication
 
 object App extends {
   private val planPath="src/test/resources/testplans/.plan"
@@ -51,7 +52,7 @@ object App extends {
 
   )
 
-} with SwingView {
+} with SimpleSwingApplication with SwingView {
   Dispatch(this,model)
 }
 
