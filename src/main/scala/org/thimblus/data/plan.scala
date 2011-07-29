@@ -18,27 +18,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.local
+package org.thimblus.data
 
-import org.thimblus.model._
-import net.liftweb.json.Serialization.{read,write}
+import org.thimblus.Util._
+import java.util.Date
 import net.liftweb.json._
-import org.thimblus.io.IO._
-import org.thimblus.plan._
-import org.thimblus.config.Live._
+import net.liftweb.json.JsonParser._
 
-class LocalModel extends HomeModel (
+trait PlanWatcher {
+   var plan: Plan 
+}
 
-    poster = (metadata,plan,post)=>{
-      val newPlan=plan + post
-      planTarget(Planex(metadata, write(newPlan)))
-    },
+case class Plan(address: String, following: List[Follower], messages: List[Message]) {
+  def + (post: String) = {
+    Plan(this.address, this.following, Message(post,new Date()) :: this.messages)
+  }
+}
 
-    loadPlan = () => {
-      val Planex(metadata, planStr) = load()
-      (metadata, read[Plan](planStr))
-    }
+case class Follower(address: String)
 
-)
+case class Message(text: String, time: Date)
 
 // vim: sw=2:softtabstop=2:et:

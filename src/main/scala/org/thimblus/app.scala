@@ -18,32 +18,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.model
+package org.thimblus
 
-import scala.swing._
-import scala.swing.event._
-import org.thimblus.plan._
+import org.thimblus.swing._
+import org.thimblus.ui.Dispatch
+import scala.swing.SimpleSwingApplication
+import org.thimblus.local.LocalModel
 
-class HomeModel(poster: (String,Plan,String)=>Unit, loadPlan: ()=>(String,Plan)) extends HomeSource {
-  var metadata: String=null
-  loadPlan() match { case (x,y) => { metadata=x; plan=y; } }
-
-  def post(s: String) = {
-    poster(metadata,plan,s)
-    loadPlan() match { case (x,y) => { plan=y } }
-  }
-
+object App extends {
+  val model = new LocalModel
+} with SimpleSwingApplication with SwingView {
+  Dispatch(this,model)
 }
-
-trait HomeSource extends Publisher with PlanWatcher {
-  private[this] var p: Plan = null
-  def plan: Plan = p
-  def plan_= (x: Plan) {
-    p=x
-    publish(PlanUpdate(x))
-  }
-}
-
-case class PlanUpdate(revised: Plan) extends Event
 
 // vim: sw=2:softtabstop=2:et:

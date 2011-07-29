@@ -18,36 +18,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.swing
+package org.thimblus.config
 
-import scala.swing._
-import org.thimblus.model._
-import org.thimblus.plan._
+import java.util.TimeZone
 
-trait SwingView
-  extends org.thimblus.ui.View {
+object Live {
+  import org.thimblus.local.LocalIO._
+  import org.thimblus.data._
 
-  val myPosts = new TextArea { 
-    text = list(model.plan.messages)
-  }
-  val post = new Button { text = "post" }
-  val message = new TextField
-  
-  def top = new MainFrame {
-    title = "Thimblus"
-    contents = new BoxPanel(Orientation.Vertical) {
-      contents += message
-      contents += post
-      contents += myPosts
-    }
-  }
-
-  private def list(messages: List[Message]) = 
-    messages map (_.text) mkString "\n" 
-
-  reactions += {
-    case PlanUpdate(newPlan) => 
-    myPosts.text=list(newPlan.messages)
-  }
+  private val planPath="src/test/resources/testplans/.plan"
+  val load=makeLoader(planPath)
+  val planTarget=makeRecorder(planPath)(_)
+  implicit val thimblusFormats= new ThumblusFormats(TimeZone.getDefault())
 }
+
 // vim: sw=2:softtabstop=2:et:

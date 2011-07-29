@@ -28,7 +28,7 @@ import scala.swing._
 import scala.swing.event._
 import org.thimblus.ui._
 import org.thimblus.model._
-import org.thimblus.plan._
+import org.thimblus.data._
 
 class UISuite extends WordSpec with ShouldMatchers {
   "Dispatch" should {

@@ -25,7 +25,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.TestFailedException
 import scala.swing._
 import org.thimblus.model._
-import org.thimblus.plan._
+import org.thimblus.data._
 
 class SwingSuite extends WordSpec with ShouldMatchers {
   "myPosts" should { 

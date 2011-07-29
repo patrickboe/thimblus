@@ -29,7 +29,7 @@ import net.liftweb.json._
 import net.liftweb.json.Serialization.{read,write}
 import net.liftweb.json.JsonAST._
 import org.thimblus.Util._
-import org.thimblus.plan._
+import org.thimblus.data._
 
 class PlanSpec extends WordSpec with ShouldMatchers {
 

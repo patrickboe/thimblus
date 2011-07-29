@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.plan
+package org.thimblus.data
 
 import org.thimblus.Util._
 import java.util.{Date,TimeZone}

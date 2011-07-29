@@ -24,8 +24,8 @@ import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.TestFailedException
 import java.util.Date
-import org.thimblus.plan._
-import org.thimblus.Aggregation._
+import org.thimblus.data._
+import Aggregation._
 
 class AggregationSuite extends WordSpec with ShouldMatchers {
   "sort" should {

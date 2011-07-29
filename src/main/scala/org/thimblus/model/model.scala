@@ -18,25 +18,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.plan
+package org.thimblus.model
 
-import org.thimblus.Util._
-import java.util.Date
-import net.liftweb.json._
-import net.liftweb.json.JsonParser._
+import scala.swing._
+import scala.swing.event._
+import org.thimblus.data._
 
-trait PlanWatcher {
-   var plan: Plan 
+class HomeModel(poster: (String,Plan,String)=>Unit, loadPlan: ()=>(String,Plan)) extends HomeSource {
+  var metadata: String=null
+  loadPlan() match { case (x,y) => { metadata=x; plan=y; } }
+
+  def post(s: String) = {
+    poster(metadata,plan,s)
+    loadPlan() match { case (x,y) => { plan=y } }
+  }
+
 }
 
-case class Plan(address: String, following: List[Follower], messages: List[Message]) {
-  def + (post: String) = {
-    Plan(this.address, this.following, Message(post,new Date()) :: this.messages)
+trait HomeSource extends Publisher with PlanWatcher {
+  private[this] var p: Plan = null
+  def plan: Plan = p
+  def plan_= (x: Plan) {
+    p=x
+    publish(PlanUpdate(x))
   }
 }
 
-case class Follower(address: String)
-
-case class Message(text: String, time: Date)
+case class PlanUpdate(revised: Plan) extends Event
 
 // vim: sw=2:softtabstop=2:et:

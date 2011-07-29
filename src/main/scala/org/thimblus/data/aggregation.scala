@@ -18,16 +18,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.swing
+package org.thimblus.data
 
-import org.thimblus.ui.Dispatch
-import scala.swing.SimpleSwingApplication
-import org.thimblus.local.LocalModel
+object Aggregation {
 
-object App extends {
-  val model = new LocalModel
-} with SimpleSwingApplication with SwingView {
-  Dispatch(this,model)
+  implicit val messageOrder = new Ordering[Message] { 
+    def compare(x: Message,y: Message) = { y.time compareTo x.time }
+  }
+
+  def sort(unsorted: Plan) = {
+    Plan(unsorted.address, unsorted.following, unsorted.messages.sorted)
+  }
+
 }
 
 // vim: sw=2:softtabstop=2:et:

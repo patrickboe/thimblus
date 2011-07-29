@@ -18,19 +18,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus
-import org.thimblus.plan._
+package org.thimblus.local
 
-object Aggregation {
+import org.thimblus.model._
+import net.liftweb.json.Serialization.{read,write}
+import net.liftweb.json._
+import org.thimblus.io.IO._
+import org.thimblus.data._
+import org.thimblus.config.Live._
 
-  implicit val messageOrder = new Ordering[Message] { 
-    def compare(x: Message,y: Message) = { y.time compareTo x.time }
-  }
+class LocalModel extends HomeModel (
 
-  def sort(unsorted: Plan) = {
-    Plan(unsorted.address, unsorted.following, unsorted.messages.sorted)
-  }
+    poster = (metadata,plan,post)=>{
+      val newPlan=plan + post
+      planTarget(Planex(metadata, write(newPlan)))
+    },
 
-}
+    loadPlan = () => {
+      val Planex(metadata, planStr) = load()
+      (metadata, read[Plan](planStr))
+    }
+
+)
 
 // vim: sw=2:softtabstop=2:et:

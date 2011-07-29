@@ -27,7 +27,7 @@ import net.liftweb.json._
 import net.liftweb.json.Serialization.write
 import java.util.{Locale,Calendar,TimeZone,Date}
 import org.thimblus.Util._
-import org.thimblus.plan._
+import org.thimblus.data._
 
 class PlanFormatSpec extends WordSpec with ShouldMatchers {
   implicit val formats = new ThumblusFormats(TimeZone.getTimeZone("America/New_York"))
