@@ -50,6 +50,8 @@ object IO {
   }
 }
 
+case class PlanNotFoundException(cause: Exception) extends Exception(cause)
+
 case class ThimblCharset(charset: Charset)
 
 case class Path(file: String, directory: String)

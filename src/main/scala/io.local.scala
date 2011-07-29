@@ -41,6 +41,4 @@ object LocalIO {
   }
 }
 
-case class PlanNotFoundException(cause: Exception) extends Exception(cause)
-
 // vim: sw=2:softtabstop=2:et:
