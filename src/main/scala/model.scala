@@ -24,13 +24,13 @@ import scala.swing._
 import scala.swing.event._
 import org.thimblus.plan._
 
-class HomeModel(poster: (String,Plan,String)=>Unit, planLoader: ()=>(String,Plan)) extends HomeSource {
+class HomeModel(poster: (String,Plan,String)=>Unit, loadPlan: ()=>(String,Plan)) extends HomeSource {
   var metadata: String=null
-  planLoader() match { case (x,y) => { metadata=x; plan=y; } }
+  loadPlan() match { case (x,y) => { metadata=x; plan=y; } }
 
   def post(s: String) = {
     poster(metadata,plan,s)
-    planLoader() match { case (x,y) => { plan=y } }
+    loadPlan() match { case (x,y) => { plan=y } }
   }
 
 }
@@ -40,10 +40,10 @@ trait HomeSource extends Publisher with PlanWatcher {
   def plan: Plan = p
   def plan_= (x: Plan) {
     p=x
-    publish(PlanUpdate(this))
+    publish(PlanUpdate(x))
   }
 }
 
-case class PlanUpdate(source: HomeSource) extends Event
+case class PlanUpdate(revised: Plan) extends Event
 
 // vim: sw=2:softtabstop=2:et:

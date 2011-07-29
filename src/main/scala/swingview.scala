@@ -22,12 +22,13 @@ package org.thimblus.swing
 
 import scala.swing._
 import org.thimblus.model._
+import org.thimblus.plan._
 
 trait SwingView
   extends org.thimblus.ui.View {
 
   val myPosts = new TextArea { 
-    text = readMyPosts
+    text = list(model.plan.messages)
   }
   val post = new Button { text = "post" }
   val message = new TextField
@@ -41,11 +42,12 @@ trait SwingView
     }
   }
 
-  private def readMyPosts = 
-    (for( m <- model.plan.messages) yield m.text).mkString("\n")
+  private def list(messages: List[Message]) = 
+    messages map (_.text) mkString "\n" 
 
   reactions += {
-    case PlanUpdate(`model`) => myPosts.text=readMyPosts
+    case PlanUpdate(newPlan) => 
+    myPosts.text=list(newPlan.messages)
   }
 }
 // vim: sw=2:softtabstop=2:et:

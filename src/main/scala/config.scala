@@ -18,16 +18,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.swing
+package org.thimblus.config
 
-import org.thimblus.ui.Dispatch
-import scala.swing.SimpleSwingApplication
-import org.thimblus.local.LocalModel
+import java.util.TimeZone
 
-object App extends {
-  val model = new LocalModel
-} with SimpleSwingApplication with SwingView {
-  Dispatch(this,model)
+object Live {
+  import org.thimblus.local.LocalIO._
+  import org.thimblus.plan._
+
+  private val planPath="src/test/resources/testplans/.plan"
+  val load=makeLoader(planPath)
+  val planTarget=makeRecorder(planPath)(_)
+  implicit val thimblusFormats= new ThumblusFormats(TimeZone.getDefault())
 }
 
 // vim: sw=2:softtabstop=2:et:

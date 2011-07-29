@@ -18,12 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.io
+package org.thimblus.local
 
+import org.thimblus.io._
 import java.io._
 import org.thimblus.io.IO._
 
-object Local {
+object LocalIO {
   def makeLoader(path: String) = () => {
     try {
       stringify(new FileReader(path))

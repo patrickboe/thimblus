@@ -18,16 +18,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.swing
+package org.thimblus.local
 
-import org.thimblus.ui.Dispatch
-import scala.swing.SimpleSwingApplication
-import org.thimblus.local.LocalModel
+import org.thimblus.model._
+import net.liftweb.json.Serialization.{read,write}
+import net.liftweb.json._
+import org.thimblus.io.IO._
+import org.thimblus.plan._
+import org.thimblus.config.Live._
 
-object App extends {
-  val model = new LocalModel
-} with SimpleSwingApplication with SwingView {
-  Dispatch(this,model)
-}
+class LocalModel extends HomeModel (
+
+    poster = (metadata,plan,post)=>{
+      val newPlan=plan + post
+      planTarget(Planex(metadata, write(newPlan)))
+    },
+
+    loadPlan = () => {
+      val Planex(metadata, planStr) = load()
+      (metadata, read[Plan](planStr))
+    }
+
+)
 
 // vim: sw=2:softtabstop=2:et:

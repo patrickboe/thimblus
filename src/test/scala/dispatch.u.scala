@@ -102,10 +102,10 @@ class UISuite extends WordSpec with ShouldMatchers {
           val message = null
           var noticedPlanUpdate = false
           reactions += {
-            case PlanUpdate(`model`)=>noticedPlanUpdate=true  
+            case PlanUpdate(x)=>noticedPlanUpdate=true  
         }
       }
-      mockSource.publish(PlanUpdate(mockSource))
+      mockSource.publish(PlanUpdate(null))
       assert(view.noticedPlanUpdate)
     }
   }
@@ -114,15 +114,16 @@ class UISuite extends WordSpec with ShouldMatchers {
     "publish an event when its plan gets updated" in {
       var updated=false
       val testHomeSource = new HomeSource{}
+      val testPlan=Plan("test@test.com",null,null)
       val tester = new Reactor {
         listenTo(testHomeSource)
         reactions += {
-          case PlanUpdate(p) => updated = (p eq testHomeSource)
+          case PlanUpdate(p) => updated = (p == testPlan)
           case _ =>
         }
       }
 
-      testHomeSource.plan=Plan("test@test.com",null,null)
+      testHomeSource.plan=testPlan
       assert(updated)
     }
   }
