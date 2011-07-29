@@ -25,16 +25,50 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.TestFailedException
 import scala.swing._
 import org.thimblus.model._
-import org.thimblus.plan.Plan
+import org.thimblus.plan._
 
 class SwingSuite extends WordSpec with ShouldMatchers {
   "myPosts" should { 
-    "contain a formatted list of past posts" in {
-      val tester  = new {
-        val model=new HomeSource{
-          plan=Plan(null,Nil,Nil)
-        }
-      } with SwingView 
+    val startingMessages=
+      Message("Second Message",null) :: Message("First Message",null) :: Nil
+    val startingPlan=Plan(null,Nil,startingMessages)
+    val testModel= new HomeSource {
+        plan=startingPlan
+    }
+    val tester  = new { 
+      val model=testModel 
+    } with SwingView 
+
+    "maintain a formatted list of past posts" in {
+      val newMessages= 
+        Message("Third Message",null) :: startingMessages
+      val updatedPlan=Plan(null,Nil,newMessages)
+      val startingPosts = tester.myPosts.text
+      testModel.plan=updatedPlan
+      val updatedPosts = tester.myPosts.text
+      startingPosts should equal (
+"""Second Message
+First Message"""
+      )
+      updatedPosts should equal (
+"""Third Message
+Second Message
+First Message"""
+      )
+    }
+
+    "have an appropriate title" in {
+      val title=tester.top.title
+      title should equal ("Thimblus")
+    }
+
+    "put its myPosts, post, and message controls in a main frame" in {
+      val bp=tester.top.contents.head.asInstanceOf[BoxPanel]
+      val contents = bp.contents
+      contents should have length (3)
+      contents.filter(c=>c eq tester.myPosts) should have length (1)
+      contents.filter(c=>c eq tester.post) should have length (1)
+      contents.filter(c=>c eq tester.message) should have length (1)
     }
   }
 }
