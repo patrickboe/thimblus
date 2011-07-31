@@ -39,20 +39,11 @@ trait HomeSource extends HomeStore with Publisher {
     publish(PlanUpdate(x))
   }
 }
-
-class HomeModelA(service: PlanService, store: HomeStore)
-extends Closeable {
-  private val loaderRepo = service.getRepo()
-  store.plan = (loaderRepo !! LoadRequest()) match {
-      case Some(p: Plan) => p
-      case _ => throw new RuntimeException("timeout")
-    }
-  def close() = service.close()
-}
-
 case class LoadRequest
 
 case class PlanUpdate(revised: Plan) extends Event
+
+class PlanTimeoutException extends RuntimeException
 
 trait PlanService extends Closeable {
   def getRepo(): ActorRef

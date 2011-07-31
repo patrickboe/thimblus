@@ -21,6 +21,19 @@
 package org.thimblus.model
 
 import org.thimblus.data._
+import akka.actor._
+import akka.event.EventHandler
+import java.io.Closeable
+
+class HomeModelA(service: PlanService, store: HomeStore)
+extends Closeable {
+  private val loaderRepo = service.getRepo()
+  store.plan = (loaderRepo !! LoadRequest()) match {
+      case Some(p: Plan) => p
+      case _ => throw new PlanTimeoutException()
+    }
+  def close() = service.close()
+}
 
 class HomeModel(
     poster: (String,Plan,String)=>Unit,
@@ -33,6 +46,5 @@ class HomeModel(
     poster(metadata,plan,s)
     loadPlan() match { case (x,y) => { plan=y } }
   }
-
 }
 // vim: sw=2:softtabstop=2:et:
