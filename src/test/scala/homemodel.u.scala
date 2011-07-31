@@ -80,18 +80,6 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
         fx.svcIsOpen should be (false)
       }
     }
-
-    """spawn a new Poster to handle any post requests,
-    passing it a reference to the PlanService""" in {
-      val fx = new svcFixture(
-        actorOf(new Actor{
-          def receive = { 
-            case LoadRequest() => self.reply(null)
-            case _ => 
-          }
-        })
-      )
-    }
   }
   "HomeModel" should {
     "load the current plan and metadata on creation" in {
