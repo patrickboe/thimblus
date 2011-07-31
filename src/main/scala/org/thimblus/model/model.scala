@@ -23,19 +23,15 @@ package org.thimblus.model
 import scala.swing._
 import scala.swing.event._
 import org.thimblus.data._
+import akka.actor._
+import akka.event.EventHandler
+import java.io.Closeable
 
-class HomeModel(poster: (String,Plan,String)=>Unit, loadPlan: ()=>(String,Plan)) extends HomeSource {
-  var metadata: String=null
-  loadPlan() match { case (x,y) => { metadata=x; plan=y; } }
-
-  def post(s: String) = {
-    poster(metadata,plan,s)
-    loadPlan() match { case (x,y) => { plan=y } }
-  }
-
+trait HomeStore {
+  var plan: Plan
 }
 
-trait HomeSource extends Publisher with PlanWatcher {
+trait HomeSource extends HomeStore with Publisher {
   private[this] var p: Plan = null
   def plan: Plan = p
   def plan_= (x: Plan) {
@@ -44,6 +40,22 @@ trait HomeSource extends Publisher with PlanWatcher {
   }
 }
 
+class HomeModelA(service: PlanService, store: HomeStore)
+extends Closeable {
+  private val loaderRepo = service.getRepo()
+  store.plan = (loaderRepo !! LoadRequest()) match {
+      case Some(p: Plan) => p
+      case _ => throw new RuntimeException("timeout")
+    }
+  def close() = service.close()
+}
+
+case class LoadRequest
+
 case class PlanUpdate(revised: Plan) extends Event
+
+trait PlanService extends Closeable {
+  def getRepo(): ActorRef
+}
 
 // vim: sw=2:softtabstop=2:et:

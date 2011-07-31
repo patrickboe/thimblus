@@ -25,10 +25,6 @@ import java.util.Date
 import net.liftweb.json._
 import net.liftweb.json.JsonParser._
 
-trait PlanWatcher {
-   var plan: Plan 
-}
-
 case class Plan(address: String, following: List[Follower], messages: List[Message]) {
   def + (post: String) = {
     Plan(this.address, this.following, Message(post,new Date()) :: this.messages)
