@@ -33,7 +33,7 @@ import Actor._
 class HomeModelSuite extends WordSpec with ShouldMatchers {
   val curPlan=new Plan(null,Nil,Nil)
 
-  class svcFixture(mockRepo: ActorRef) {
+  class svcStub(mockRepo: ActorRef) {
     var svcIsOpen=false
     val svc = new PlanService {
       private val repo = mockRepo
@@ -55,7 +55,7 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
 
     """set its store's plan to what it gets back in
     response to a load message to its repository""" in {
-      val fx = new svcFixture(
+      val fx = new svcStub(
         actorOf(new Actor{
           def receive = {
             case LoadRequest() => self.reply(curPlan)
@@ -63,24 +63,31 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
           }
         })
       )
-      using(new HomeModelA(fx.svc,fx.store)) { model => }
+      val mref = actorOf(new HomeModelA(fx.svc,fx.store)).start()
       fx.store.plan should equal (curPlan)
+      mref.stop()
       fx.svcIsOpen should be (false)
     }
 
     """throw a PlanTimeoutException when the response times out""" in {
-      val fx = new svcFixture(
+      val fx = new svcStub(
         actorOf(new Actor{
           def receive = { case _ => }
         })
       )
-      intercept[PlanTimeoutException] {
-        using(new HomeModelA(fx.svc,fx.store)) { model => }
-        fx.store.plan should equal (null)
-        fx.svcIsOpen should be (false)
+      val mref = actorOf(new HomeModelA(fx.svc,fx.store))
+      try{
+        intercept[PlanTimeoutException] {
+          mref.start()
+        }
+      } finally {
+        mref.stop()
       }
+      fx.store.plan should equal (null)
+      fx.svcIsOpen should be (false)
     }
   }
+
   "HomeModel" should {
     "load the current plan and metadata on creation" in {
       val tastyPlan=Plan("tasty@burgers.com",null,null)

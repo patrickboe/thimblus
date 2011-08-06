@@ -23,16 +23,22 @@ package org.thimblus.model
 import org.thimblus.data._
 import akka.actor._
 import akka.event.EventHandler
-import java.io.Closeable
 
 class HomeModelA(service: PlanService, store: HomeStore)
-extends Closeable {
+extends Actor {
   private val loaderRepo = service.getRepo()
-  store.plan = (loaderRepo !! LoadRequest()) match {
+  override def preStart() = {
+    store.plan = (loaderRepo !! LoadRequest()) match {
       case Some(p: Plan) => p
       case _ => throw new PlanTimeoutException()
     }
-  def close() = service.close()
+  }
+  override def postStop() = {
+    service.close()
+  }
+  def receive = {
+    case _ => throw new RuntimeException("TIMEOUT")
+  }
 }
 
 class HomeModel(
