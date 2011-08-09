@@ -27,6 +27,7 @@ import org.thimblus.model._
 import org.thimblus.data._
 import org.thimblus.io.IO.using
 import akka.actor._
+import akka.config.Supervision._
 import akka.event.EventHandler
 import Actor._
 
@@ -55,7 +56,7 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
 
     """set its store's plan to what it gets back in
     response to a load message to its repository""" in {
-      val fx = new svcStub(
+      val svc = new svcStub(
         actorOf(new Actor{
           def receive = {
             case LoadRequest() => self.reply(curPlan)
@@ -63,28 +64,44 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
           }
         })
       )
-      val mref = actorOf(new HomeModelA(fx.svc,fx.store)).start()
-      fx.store.plan should equal (curPlan)
-      mref.stop()
-      fx.svcIsOpen should be (false)
+      val model = actorOf(new HomeModelA(svc.svc,svc.store))
+      try{
+        model.start()
+        svc.store.plan should equal (null)
+        (model !! "plan") should equal (Some(curPlan))
+        svc.store.plan should equal (curPlan)
+      } finally {
+        model.stop()
+      }
+      svc.svcIsOpen should be (false)
     }
 
-    """throw a PlanTimeoutException when the response times out""" in {
-      val fx = new svcStub(
+    """throw a GibberishException for unrecognized messages""" in {
+      val svc = new svcStub(
         actorOf(new Actor{
-          def receive = { case _ => }
+          def receive = { case _ => {
+              self.channel ! "you're savage with the cabbage"
+            }
+          }
         })
       )
-      val mref = actorOf(new HomeModelA(fx.svc,fx.store))
+      val model = actorOf(new HomeModelA(svc.svc,svc.store))
+      val supervisor = Supervisor(
+        SupervisorConfig(
+          OneForOneStrategy(List(classOf[Exception]), 3, 1000),
+          Supervise(model,Permanent) :: Nil
+        )
+      )
       try{
-        intercept[PlanTimeoutException] {
-          mref.start()
+        intercept[GibberishException] {
+          supervisor.start
+          model !! "plan"
         }
       } finally {
-        mref.stop()
+        supervisor.shutdown
       }
-      fx.store.plan should equal (null)
-      fx.svcIsOpen should be (false)
+      svc.store.plan should equal (null)
+      svc.svcIsOpen should be (false)
     }
   }
 

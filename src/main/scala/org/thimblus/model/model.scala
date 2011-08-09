@@ -45,6 +45,8 @@ case class PlanUpdate(revised: Plan) extends Event
 
 class PlanTimeoutException extends RuntimeException
 
+class GibberishException(message: Any) extends RuntimeException(message.toString)
+
 trait PlanService extends Closeable {
   def getRepo(): ActorRef
 }

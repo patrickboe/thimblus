@@ -27,17 +27,22 @@ import akka.event.EventHandler
 class HomeModelA(service: PlanService, store: HomeStore)
 extends Actor {
   private val loaderRepo = service.getRepo()
-  override def preStart() = {
-    store.plan = (loaderRepo !! LoadRequest()) match {
-      case Some(p: Plan) => p
-      case _ => throw new PlanTimeoutException()
-    }
-  }
+  private var view: Channel[Any] = null
+
   override def postStop() = {
     service.close()
   }
+
   def receive = {
-    case _ => throw new RuntimeException("TIMEOUT")
+    case "plan" => {
+      view=self.channel
+      loaderRepo ! LoadRequest()
+    }
+    case p: Plan => {
+      store.plan=p
+      view ! store.plan
+    }
+    case _ => throw new GibberishException("test")
   }
 }
 
