@@ -34,15 +34,15 @@ extends Actor {
   }
 
   def receive = {
-    case "plan" => {
+    case r: Request => {
       view=self.channel
-      loaderRepo ! LoadRequest()
+      loaderRepo ! r
     }
     case p: Plan => {
       store.plan=p
       view ! store.plan
     }
-    case _ => throw new GibberishException("test")
+    case _ =>
   }
 }
 
