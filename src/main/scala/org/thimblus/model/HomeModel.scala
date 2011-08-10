@@ -33,7 +33,7 @@ class HomeModelA(
 extends Actor {
   private val loaderRepo = service.getRepo()
   private var view: Channel[Any] = null
-  
+
   override def postStop() = {
     service.close()
   }
@@ -44,14 +44,15 @@ extends Actor {
       loaderRepo ! r
     }
 
-    case p: Plan => {
-      store.plan=p
-      view ! store.plan
+    case (metadata: String, plan: Plan) => {
+      store.plan=plan
+      store.metadata=metadata
+      view ! plan
     }
 
-    case s: String => {
-      store.plan += Message(s, time())
-      loaderRepo ! store.plan
+    case post: String => {
+      store.plan += Message(post, time())
+      loaderRepo ! (store.metadata, store.plan)
       self.reply(store.plan)
     }
   }
@@ -61,7 +62,6 @@ class HomeModel(
     poster: (String,Plan,String)=>Unit,
     loadPlan: ()=>(String,Plan)
   ) extends HomeSource {
-  var metadata: String=null
   loadPlan() match { case (x,y) => { metadata=x; plan=y; } }
 
   def post(s: String) = {

@@ -35,6 +35,7 @@ import Actor._
 class HomeModelSuite extends WordSpec with ShouldMatchers {
   val curPlan=new Plan(null,Nil,Nil)
   val curTime = new Date()
+  val metaData = "bunnies are delicious"
 
   class svcStub(mockRepo: ActorRef) {
     var svcIsOpen=false
@@ -51,6 +52,7 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
     }
     val store = new HomeStore {
       var plan: Plan=null
+      var metadata: String=null
     }
     def time() = curTime
   }
@@ -61,7 +63,7 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
       val svc = new svcStub(
         actorOf(new Actor{
           def receive = {
-            case Request("plan") => self.reply(curPlan)
+            case Request("plan") => self.reply(metaData,curPlan)
           }
         })
       )
@@ -70,10 +72,11 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
         model.start()
         svc.store.plan should equal (null)
         (model !! Request("plan")) should equal (Some(curPlan))
-        svc.store.plan should equal (curPlan)
       } finally {
         model.stop()
       }
+      svc.store.plan should equal (curPlan)
+      svc.store.metadata should equal (metaData)
       svc.svcIsOpen should be (false)
     }
 
@@ -87,6 +90,7 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
           def receive = { case newPlan => flushed=true }
         })
       )
+      svc.store.metadata=metaData
       svc.store.plan=curPlan
       val model = actorOf(new HomeModelA(svc.svc,svc.store,svc.time))
       try{
@@ -95,6 +99,8 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
       } finally {
         model.stop()
       }
+      svc.store.plan should equal (newPlan)
+      svc.store.metadata should equal (metaData)
       flushed should be (true)
     }
   }

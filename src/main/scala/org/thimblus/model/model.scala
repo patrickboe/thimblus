@@ -30,10 +30,12 @@ import java.io.Closeable
 
 trait HomeStore {
   var plan: Plan
+  var metadata: String
 }
 
 trait HomeSource extends HomeStore with Publisher {
   private[this] var p: Plan = null
+  var metadata: String = null
   def plan: Plan = p
   def plan_= (x: Plan) {
     p=x
