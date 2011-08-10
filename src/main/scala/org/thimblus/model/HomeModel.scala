@@ -23,12 +23,17 @@ package org.thimblus.model
 import org.thimblus.data._
 import akka.actor._
 import akka.event.EventHandler
+import java.util.Date
 
-class HomeModelA(service: PlanService, store: HomeStore)
+class HomeModelA(
+  service: PlanService, 
+  store: HomeStore,
+  time: ()=>Date
+)
 extends Actor {
   private val loaderRepo = service.getRepo()
   private var view: Channel[Any] = null
-
+  
   override def postStop() = {
     service.close()
   }
@@ -38,11 +43,17 @@ extends Actor {
       view=self.channel
       loaderRepo ! r
     }
+
     case p: Plan => {
       store.plan=p
       view ! store.plan
     }
-    case _ =>
+
+    case s: String => {
+      store.plan += Message(s, time())
+      loaderRepo ! store.plan
+      self.reply(store.plan)
+    }
   }
 }
 

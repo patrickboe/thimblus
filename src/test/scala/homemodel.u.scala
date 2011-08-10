@@ -20,6 +20,7 @@
  */
 package org.thimblus.test.model
 
+import java.util.Date
 import org.scalatest.WordSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.TestFailedException
@@ -33,6 +34,7 @@ import Actor._
 
 class HomeModelSuite extends WordSpec with ShouldMatchers {
   val curPlan=new Plan(null,Nil,Nil)
+  val curTime = new Date()
 
   class svcStub(mockRepo: ActorRef) {
     var svcIsOpen=false
@@ -50,21 +52,20 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
     val store = new HomeStore {
       var plan: Plan=null
     }
+    def time() = curTime
   }
 
   "HomeModelA" should {
-
     """set its store's plan to what it gets back in
     response to a load message to its repository""" in {
       val svc = new svcStub(
         actorOf(new Actor{
           def receive = {
             case Request("plan") => self.reply(curPlan)
-            case _ =>
           }
         })
       )
-      val model = actorOf(new HomeModelA(svc.svc,svc.store))
+      val model = actorOf(new HomeModelA(svc.svc,svc.store,svc.time))
       try{
         model.start()
         svc.store.plan should equal (null)
@@ -76,26 +77,25 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
       svc.svcIsOpen should be (false)
     }
 
-    """throw a GibberishException for unrecognized messages""" ignore {
-      val svc = new svcStub(
+    """respond to a new post by adding it to the current plan,
+    flushing it to the repository, and returning the new plan""" in {
+      val newPost = "GrApE nUtS!"
+      val newPlan = curPlan + Message(newPost,curTime)
+      var flushed = false
+      val svc = new  svcStub(
         actorOf(new Actor{
-          def receive = { case _ => {
-              self.channel ! "you're savage with the cabbage"
-            }
-          }
+          def receive = { case newPlan => flushed=true }
         })
       )
-      val model = actorOf(new HomeModelA(svc.svc,svc.store))
+      svc.store.plan=curPlan
+      val model = actorOf(new HomeModelA(svc.svc,svc.store,svc.time))
       try{
-        intercept[GibberishException] {
-          model.start
-          model !! Request("plan")
-        }
+        model.start()
+        (model !! newPost) should equal (Some(newPlan))
       } finally {
-        model.stop
+        model.stop()
       }
-      svc.store.plan should equal (null)
-      svc.svcIsOpen should be (false)
+      flushed should be (true)
     }
   }
 

@@ -20,6 +20,7 @@
  */
 package org.thimblus.model
 
+import java.util.Date
 import scala.swing._
 import scala.swing.event._
 import org.thimblus.data._

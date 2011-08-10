@@ -109,7 +109,15 @@ class PlanSpec extends WordSpec with ShouldMatchers {
       assert(doubleParsed==p)
     }
 
-    "add posts" in {
+    "add Message posts" in {
+      val newPost = Message("Meet us up later on at the Plat",new Date())
+      val newPlan = p + newPost
+      val latest = newPlan.messages.head
+      latest should equal (newPost)
+      newPlan should not be {equal (p)}
+    }
+
+    "add String posts" in {
       val newPost = "Meet us up later on at the Plat"
       val newPlan = p + newPost
       val latest = newPlan.messages.head

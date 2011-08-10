@@ -26,9 +26,15 @@ import net.liftweb.json._
 import net.liftweb.json.JsonParser._
 
 case class Plan(address: String, following: List[Follower], messages: List[Message]) {
+  
+  def + (post: Message) = {
+    Plan(this.address, this.following, post :: this.messages)
+  }
+
   def + (post: String) = {
     Plan(this.address, this.following, Message(post,new Date()) :: this.messages)
   }
+
 }
 
 case class Follower(address: String)
