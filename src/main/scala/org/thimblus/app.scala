@@ -24,6 +24,7 @@ import org.thimblus.swing._
 import org.thimblus.ui.Dispatch
 import scala.swing.SimpleSwingApplication
 import org.thimblus.local.LocalModel
+import org.thimblus.config.Live._
 
 object App extends {
   val model = new LocalModel

@@ -25,9 +25,12 @@ import net.liftweb.json.Serialization.{read,write}
 import net.liftweb.json._
 import org.thimblus.io.IO._
 import org.thimblus.data._
-import org.thimblus.config.Live._
 
-class LocalModel extends HomeModel (
+class LocalModel(
+  implicit val thimblusFormats: Formats,
+  implicit val load: () => String,
+  implicit val planTarget: String => Unit
+)  extends HomeModel (
 
     poster = (metadata,plan,post)=>{
       val newPlan=plan + post

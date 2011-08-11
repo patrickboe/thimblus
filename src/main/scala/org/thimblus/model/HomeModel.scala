@@ -26,7 +26,7 @@ import akka.event.EventHandler
 import java.util.Date
 
 class HomeModelA(
-  service: PlanService, 
+  service: IPlanDispatch, 
   store: HomeStore,
   time: ()=>Date
 )

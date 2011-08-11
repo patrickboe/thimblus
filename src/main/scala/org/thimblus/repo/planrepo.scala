@@ -18,34 +18,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.thimblus.model
+package org.thimblus.repo
 
-import java.util.Date
-import scala.swing._
-import scala.swing.event._
 import org.thimblus.data._
-import akka.event.EventHandler
+import akka.actor._
+import net.liftweb.json._
+import net.liftweb.json.Serialization.{read,write}
+import org.thimblus.io.IO._
 
-trait HomeStore {
-  var plan: Plan
-  var metadata: String
-}
-
-trait HomeSource extends HomeStore with Publisher {
-  private[this] var p: Plan = null
-  var metadata: String = null
-  def plan: Plan = p
-  def plan_= (x: Plan) {
-    p=x
-    publish(PlanUpdate(x))
+class PlanRepo(env: {
+  val jsonFormats: Formats
+  val load: () => String
+  val planTarget: String => Unit
+}) extends Actor {
+  implicit val jsonFormats = env.jsonFormats
+  def receive = {
+    case (metaData: String, plan: Plan) => {
+      val s = Planex(metaData,write(plan))
+      env.planTarget(s)
+      self.channel ! s
+    }
   }
 }
-case class Request(requested: String)
-
-case class PlanUpdate(revised: Plan) extends Event
-
-class PlanTimeoutException extends RuntimeException
-
-class GibberishException(message: Any) extends RuntimeException(message.toString)
-
-// vim: sw=2:softtabstop=2:et:

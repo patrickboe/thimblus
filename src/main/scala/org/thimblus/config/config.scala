@@ -21,14 +21,14 @@
 package org.thimblus.config
 
 import java.util.TimeZone
+import org.thimblus.data._
 
 object Live {
   import org.thimblus.local.LocalIO._
-  import org.thimblus.data._
 
   private val planPath="src/test/resources/testplans/.plan"
-  val load=makeLoader(planPath)
-  val planTarget=makeRecorder(planPath)(_)
+  implicit val load=makeLoader(planPath)
+  implicit val planTarget=makeRecorder(planPath)(_)
   implicit val thimblusFormats= new ThumblusFormats(TimeZone.getDefault())
 }
 

@@ -18,34 +18,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Thimblus.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.thimblus.model
 
-import java.util.Date
-import scala.swing._
-import scala.swing.event._
-import org.thimblus.data._
-import akka.event.EventHandler
+import akka.actor._
+import java.io.Closeable
 
-trait HomeStore {
-  var plan: Plan
-  var metadata: String
+trait IPlanDispatch extends Closeable {
+  def getRepo(): ActorRef
 }
 
-trait HomeSource extends HomeStore with Publisher {
-  private[this] var p: Plan = null
-  var metadata: String = null
-  def plan: Plan = p
-  def plan_= (x: Plan) {
-    p=x
-    publish(PlanUpdate(x))
+class PlanDispatch(generator: ()=>ActorRef) extends IPlanDispatch {
+  private var actors: List[ActorRef] = Nil
+  def getRepo() = {
+    actors ::= generator().start()
+    actors.head
+  }
+  def close() = {
+    actors.map(_.stop())
   }
 }
-case class Request(requested: String)
-
-case class PlanUpdate(revised: Plan) extends Event
-
-class PlanTimeoutException extends RuntimeException
-
-class GibberishException(message: Any) extends RuntimeException(message.toString)
-
-// vim: sw=2:softtabstop=2:et:

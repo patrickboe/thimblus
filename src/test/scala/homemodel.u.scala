@@ -39,7 +39,7 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
 
   class svcStub(mockRepo: ActorRef) {
     var svcIsOpen=false
-    val svc = new PlanService {
+    val svc = new IPlanDispatch {
       private val repo = mockRepo
       def getRepo() = {
         svcIsOpen=true
