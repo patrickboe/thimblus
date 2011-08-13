@@ -27,6 +27,7 @@ import org.scalatest.TestFailedException
 import org.thimblus.model._
 import org.thimblus.data._
 import org.thimblus.io.IO.using
+import org.thimblus.repo._
 import akka.actor._
 import akka.config.Supervision._
 import akka.event.EventHandler
@@ -63,7 +64,7 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
       val svc = new svcStub(
         actorOf(new Actor{
           def receive = {
-            case Request("plan") => self.reply(metaData,curPlan)
+            case r: PlanRequest => self.reply(metaData,curPlan)
           }
         })
       )

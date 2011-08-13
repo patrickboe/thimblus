@@ -33,51 +33,39 @@ import net.liftweb.json.Serialization.{read,write}
 
 
 class PlanRepoSuite extends WordSpec with ShouldMatchers {
+
   var written = ""
   val testPlan = Plan("murphy.brown@aol.com",Nil,Nil)
-  val metaData = "beard of bees"
+  val testMetaData = "beard of bees"
   implicit val testFormats = new DefaultFormats{
       override def dateFormatter =
         new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     }
-  val stringifiedPlan=Planex(metaData,write(testPlan))
+  val stringifiedTestPlan=Planex(testMetaData,write(testPlan))
+
   object TestEnv {
     lazy val jsonFormats = testFormats
-    lazy val load = () => "beard of bees"
+    lazy val load = () => stringifiedTestPlan
     lazy val planTarget = (s: String) => written=s
-    /*
-    : (String=>Unit) = _ match {
-      case _ =>"bees are on beard"
-    }
-    */
   }
+
   "a posted plan" should {
     "be written to the target" in {
+      val msg = (testMetaData, testPlan)
       val a = actorOf(new PlanRepo(TestEnv)).start()
-      val msg = (metaData, testPlan)
-      (a !! msg).get should be (stringifiedPlan)
+      a !!! msg
+      Thread.sleep(1)
       a.stop()
-      written should equal (stringifiedPlan)
+      written should equal (stringifiedTestPlan)
     }
   }
 
   "a load request" should {
     "return the load results" in {
+      val a = actorOf(new PlanRepo(TestEnv)).start()
+      (a !! PlanRequest()).get should equal (testMetaData, testPlan)
     }
   }
 }
-/*
-import net.liftweb.json.Serialization.{read,write}
-import net.liftweb.json._
-import org.thimblus.io.IO._
-import org.thimblus.config.Live._
-    poster = (metadata,plan,post)=>{
-      val newPlan=plan + post
-      planTarget(Planex(metadata, write(newPlan)))
-    },
 
-    loadPlan = () => {
-      val Planex(metadata, planStr) = load()
-      (metadata, read[Plan](planStr))
-    }
-*/
+// vim: sw=2:softtabstop=2:et:

@@ -36,7 +36,13 @@ class PlanRepo(env: {
     case (metaData: String, plan: Plan) => {
       val s = Planex(metaData,write(plan))
       env.planTarget(s)
-      self.channel ! s
+    }
+    case r: PlanRequest => {
+      val Planex(metaData, planStr) = env.load()
+      self.channel ! (metaData, read[Plan](planStr))
     }
   }
 }
+
+case class PlanRequest
+

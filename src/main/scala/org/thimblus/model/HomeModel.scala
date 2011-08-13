@@ -24,6 +24,7 @@ import org.thimblus.data._
 import akka.actor._
 import akka.event.EventHandler
 import java.util.Date
+import org.thimblus.repo._
 
 class HomeModelA(
   service: IPlanDispatch, 
@@ -39,9 +40,9 @@ extends Actor {
   }
 
   def receive = {
-    case r: Request => {
+    case Request("plan") => {
       view=self.channel
-      loaderRepo ! r
+      loaderRepo ! new PlanRequest
     }
 
     case (metadata: String, plan: Plan) => {

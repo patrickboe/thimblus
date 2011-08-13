@@ -40,7 +40,7 @@ trait HomeSource extends HomeStore with Publisher {
     publish(PlanUpdate(x))
   }
 }
-case class Request(requested: String)
+case class Request(info: String)
 
 case class PlanUpdate(revised: Plan) extends Event
 
