@@ -30,7 +30,7 @@ import org.thimblus.model._
 import org.thimblus.data._
 
 class UISuite extends WordSpec with ShouldMatchers {
-  "Dispatch" should {
+  "Controller" should {
     "call model.post in response to a post button click event" in {
       var posted = ""
       val expected = "My Next Post..."
@@ -41,32 +41,12 @@ class UISuite extends WordSpec with ShouldMatchers {
           val post = new Button()
           val message = new TextField(expected)
         }
-      val dispatch = Dispatch(mockView,mockModel)
+      val dispatch = Controller(mockView,mockModel)
       mockView.post.doClick
       posted should equal (expected)
       mockView.message.text should equal ("")
     }
   }
-
-
-  "View" should {
-    "subscribe to events on the model" in {
-      object mockSource extends HomeSource
-      val view = new { 
-          val model = mockSource 
-        } with View {
-          val post = null
-          val message = null
-          var noticedPlanUpdate = false
-          reactions += {
-            case PlanUpdate(x)=>noticedPlanUpdate=true  
-        }
-      }
-      mockSource.publish(PlanUpdate(null))
-      assert(view.noticedPlanUpdate)
-    }
-  }
-
 }
 
 // vim: sw=2:softtabstop=2:et:

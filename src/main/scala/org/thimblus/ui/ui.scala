@@ -24,7 +24,7 @@ import scala.swing._
 import scala.swing.event._
 import org.thimblus.model._
 
-case class Dispatch(view: View, model: HomeModel) extends Reactor {
+case class Controller(view: View, model: HomeModel) extends Reactor {
   listenTo(view.post)
   reactions += {
     case ButtonClicked(view.post) => { 
@@ -34,11 +34,10 @@ case class Dispatch(view: View, model: HomeModel) extends Reactor {
   }
 }
 
-trait View extends Reactor {
+trait View {
   val model: HomeSource
   val post: Publisher
   val message: TextComponent
-  listenTo(model)
 }
 
 // vim: sw=2:softtabstop=2:et:

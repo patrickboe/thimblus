@@ -21,7 +21,7 @@
 package org.thimblus
 
 import org.thimblus.swing._
-import org.thimblus.ui.Dispatch
+import org.thimblus.ui.Controller
 import scala.swing.SimpleSwingApplication
 import org.thimblus.local.LocalModel
 import org.thimblus.config.Live._
@@ -29,7 +29,7 @@ import org.thimblus.config.Live._
 object App extends {
   val model = new LocalModel
 } with SimpleSwingApplication with SwingView {
-  Dispatch(this,model)
+  Controller(this,model)
 }
 
 // vim: sw=2:softtabstop=2:et:

@@ -21,11 +21,12 @@
 package org.thimblus.swing
 
 import scala.swing._
+import scala.swing.event._
 import org.thimblus.model._
 import org.thimblus.data._
+import org.thimblus.ui._
 
-trait SwingView
-  extends org.thimblus.ui.View {
+trait SwingView extends View with Reactor  {
 
   val myPosts = new TextArea { 
     text = list(model.plan.messages)
@@ -49,5 +50,6 @@ trait SwingView
     case PlanUpdate(newPlan) => 
     myPosts.text=list(newPlan.messages)
   }
+  listenTo(model)
 }
 // vim: sw=2:softtabstop=2:et:
