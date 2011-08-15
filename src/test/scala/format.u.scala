@@ -126,16 +126,16 @@ Hunt gummy worms in bear forest.""")
     "passed a standard email" should {
       "separate the username and domain" in {
         val Addressex(name, domain) = "fprince@belaire.ca.state.gov"
-        assert(name == "fprince")
-        assert(domain == "belaire.ca.state.gov")
+        name should equal ("fprince")
+        domain.get should equal ("belaire.ca.state.gov")
       }
     }
 
     "passed just a username" should {
       "match the username" in {
         val Addressex(name, domain) = "fprince"
-        assert(name =="fprince")
-        assert(domain==None)
+        name should equal ("fprince")
+        domain should equal (None)
       }
     }
   }

@@ -30,7 +30,7 @@ import org.thimblus.repo._
 import org.thimblus.data._
 import java.text.SimpleDateFormat
 import net.liftweb.json.Serialization.{read,write}
-
+import org.thimblus.Util._
 
 class PlanRepoSuite extends WordSpec with ShouldMatchers {
 
@@ -41,12 +41,25 @@ class PlanRepoSuite extends WordSpec with ShouldMatchers {
       override def dateFormatter =
         new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     }
-  val stringifiedTestPlan=Planex(testMetaData,write(testPlan))
+  val testPlanString = write(testPlan)
+  val testPlanFileContent = "boogadaboogada"
+  val testPlanex = new IPlanex{
+    def apply(metadata: String, plan: String) = (metadata, plan) match {
+      case (testMetaData, testPlanString) => testPlanFileContent
+      case _ => null
+    }
+    def unapply(str: String) = {
+      when (str==testPlanFileContent) { 
+        (testMetaData, testPlanString) 
+      }
+    }
+  }
 
   object TestEnv {
     lazy val jsonFormats = testFormats
-    lazy val load = () => stringifiedTestPlan
+    lazy val load = () => testPlanFileContent
     lazy val planTarget = (s: String) => written=s
+    lazy val planex = testPlanex
   }
 
   "a posted plan" should {
@@ -56,7 +69,7 @@ class PlanRepoSuite extends WordSpec with ShouldMatchers {
       a !!! msg
       Thread.sleep(1)
       a.stop()
-      written should equal (stringifiedTestPlan)
+      written should equal (testPlanFileContent)
     }
   }
 

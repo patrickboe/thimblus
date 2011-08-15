@@ -25,7 +25,11 @@ import java.util.{Date,TimeZone}
 import java.text.SimpleDateFormat
 import net.liftweb.json._
 
-object Domainex {
+trait IDomainex {
+  def unapply(str: String) : Option[Tuple2[String,String]]
+}
+
+object Domainex extends IDomainex {
   def unapply(str: String) = {
     val lastDot = str lastIndexOf "."
     when(lastDot>0) { 
@@ -34,7 +38,12 @@ object Domainex {
   }
 }
 
-object Planex {
+trait IPlanex {
+  def apply(metadata: String, plan: String): String
+  def unapply(str: String): Option[Tuple2[String,String]]
+}
+
+object Planex extends IPlanex {
   def apply(metadata: String, plan: String) = {
     String.format("%1$sPlan:\n%2$s", metadata, plan)
   }
@@ -46,14 +55,18 @@ object Planex {
   }
 }
 
-object Addressex {
+trait IAddressex {
+  def unapply(str: String): Option[Tuple2[String,Option[String]]]
+}
+
+object Addressex extends IAddressex {
   def unapply(str: String) = {
     val lastAt = str lastIndexOf "@"
     Some {
-      if(lastAt>0)
-        str/lastAt 
-      else 
-        (str, None)
+      if(lastAt>0){
+        val (n,d) = str/lastAt 
+        (n, Some(d))
+      } else (str, None)
     }
   }
 }

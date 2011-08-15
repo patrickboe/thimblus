@@ -30,15 +30,16 @@ class PlanRepo(env: {
   val jsonFormats: Formats
   val load: () => String
   val planTarget: String => Unit
+  val planex: IPlanex
 }) extends Actor {
   implicit val jsonFormats = env.jsonFormats
   def receive = {
     case (metaData: String, plan: Plan) => {
-      val s = Planex(metaData,write(plan))
+      val s = env.planex(metaData,write(plan))
       env.planTarget(s)
     }
     case r: PlanRequest => {
-      val Planex(metaData, planStr) = env.load()
+      val env.planex(metaData, planStr) = env.load()
       self.channel ! (metaData, read[Plan](planStr))
     }
   }
