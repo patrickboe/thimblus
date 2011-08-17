@@ -29,6 +29,7 @@ import org.thimblus.data._
 import org.thimblus.io.IO.using
 import org.thimblus.repo._
 import akka.actor._
+import scala.swing._
 import akka.config.Supervision._
 import akka.event.EventHandler
 import Actor._
@@ -38,7 +39,7 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
   val curTime = new Date()
   val metaData = "bunnies are delicious"
 
-  class svcStub(mockRepo: ActorRef) {
+  class SvcStub(mockRepo: ActorRef) {
     var svcIsOpen=false
     val svc = new IPlanDispatch {
       private val repo = mockRepo
@@ -51,34 +52,39 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
         repo.stop()
       }
     }
-    val store = new HomeStore {
-      var plan: Plan=null
-      var metadata: String=null
-    }
     def time() = curTime
   }
 
   "HomeModelA" should {
     """set its store's plan to what it gets back in
     response to a load message to its repository""" in {
-      val svc = new svcStub(
+      val svc = new SvcStub(
         actorOf(new Actor{
           def receive = {
-            case r: PlanRequest => self.reply(metaData,curPlan)
+            case PlanRequest => self.channel ! (metaData,curPlan)
           }
         })
       )
-      val model = actorOf(new HomeModelA(svc.svc,svc.store,svc.time))
-      try{
-        model.start()
-        svc.store.plan should equal (null)
-        (model !! Request("plan")) should equal (Some(curPlan))
-      } finally {
-        model.stop()
-      }
-      svc.store.plan should equal (curPlan)
-      svc.store.metadata should equal (metaData)
+      val model = new HomeModelA(svc.svc,svc.time)
+      Thread.sleep(10)
+      model.plan should equal (curPlan)
+      model.close()
       svc.svcIsOpen should be (false)
+    }
+
+    """publish changes to its plan""" in {
+      val svc = new SvcStub(
+        actorOf(new Actor{ def receive = {case _ =>} })
+      )
+      val updatedPlan=Plan("ho",Nil,Nil)
+      val model = new HomeModelA(svc.svc,svc.time)
+      val listener = new Reactor {
+        var plan: Plan = null
+        reactions += { case PlanUpdate(x) => plan=x }
+        listenTo(model)
+      }
+      model.plan = updatedPlan
+      listener.plan should equal (updatedPlan)
     }
 
     """respond to a new post by adding it to the current plan,
@@ -86,23 +92,28 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
       val newPost = "GrApE nUtS!"
       val newPlan = curPlan + Message(newPost,curTime)
       var flushed = false
-      val svc = new  svcStub(
+      val svc = new  SvcStub(
         actorOf(new Actor{
-          def receive = { case newPlan => flushed=true }
+          def receive = { 
+            case (m,p) => {
+              m should equal (metaData)
+              p should equal (newPlan)
+              flushed = true
+            } 
+            case _ => self.channel ! (metaData, curPlan)
+          }
         })
       )
-      svc.store.metadata=metaData
-      svc.store.plan=curPlan
-      val model = actorOf(new HomeModelA(svc.svc,svc.store,svc.time))
-      try{
-        model.start()
-        (model !! newPost) should equal (Some(newPlan))
-      } finally {
-        model.stop()
-      }
-      svc.store.plan should equal (newPlan)
-      svc.store.metadata should equal (metaData)
+      val model = new HomeModelA(svc.svc,svc.time)
+      Thread.sleep(10)
+      model.post(newPost)
+      model.plan should equal (newPlan)
+      Thread.sleep(10)
+      model.close()
       flushed should be (true)
+    }
+
+    """be able to clean up all its resources in an immediate error""" ignore {
     }
   }
 

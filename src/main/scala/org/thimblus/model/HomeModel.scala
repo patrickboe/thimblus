@@ -21,40 +21,38 @@
 package org.thimblus.model
 
 import org.thimblus.data._
+import scala.swing._
+import scala.swing.event._
 import akka.actor._
+import akka.dispatch._
 import akka.event.EventHandler
 import java.util.Date
 import org.thimblus.repo._
+import java.io.Closeable
 
 class HomeModelA(
   service: IPlanDispatch, 
-  store: HomeStore,
   time: ()=>Date
-)
-extends Actor {
-  private val loaderRepo = service.getRepo()
-  private var view: Channel[Any] = null
-
-  override def postStop() = {
-    service.close()
+) extends Publisher with Closeable {
+  private var _plan: Plan = null
+  private var _metadata: String = null
+  def plan: Plan = _plan
+  def plan_=(p: Plan) { 
+    _plan = p 
+    publish(PlanUpdate(p))
   }
-
-  def receive = {
-    case Request("plan") => {
-      view=self.channel
-      loaderRepo ! new PlanRequest
-    }
-
-    case (metadata: String, plan: Plan) => {
-      store.plan=plan
-      store.metadata=metadata
-      view ! plan
-    }
-
-    case post: String => {
-      store.plan += Message(post, time())
-      loaderRepo ! (store.metadata, store.plan)
-      self.reply(store.plan)
+  def post(msg: String) {
+    plan += Message(msg, time())
+    service.getRepo() ! (_metadata, plan)
+  }
+  def close() = service.close()
+  
+  (service.getRepo() !!! PlanRequest) onComplete { f =>
+    f.result.get.asInstanceOf[Tuple2[String,Plan]] match {
+      case (m,p) => { 
+        plan=p 
+        _metadata=m
+      }
     }
   }
 }

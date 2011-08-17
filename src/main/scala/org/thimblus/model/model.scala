@@ -22,7 +22,7 @@ package org.thimblus.model
 
 import java.util.Date
 import scala.swing._
-import scala.swing.event._
+import scala.swing.event.Event
 import org.thimblus.data._
 import akka.event.EventHandler
 
@@ -40,6 +40,7 @@ trait HomeSource extends HomeStore with Publisher {
     publish(PlanUpdate(x))
   }
 }
+
 case class Request(info: String)
 
 case class PlanUpdate(revised: Plan) extends Event
