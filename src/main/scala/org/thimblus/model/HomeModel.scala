@@ -34,25 +34,41 @@ class HomeModelA(
   service: IPlanDispatch, 
   time: ()=>Date
 ) extends Publisher with Closeable {
-  private var _plan: Plan = null
-  private var _metadata: String = null
+
   def plan: Plan = _plan
+
   def plan_=(p: Plan) { 
     _plan = p 
     publish(PlanUpdate(p))
   }
+
   def post(msg: String) {
     plan += Message(msg, time())
     service.getRepo() ! (_metadata, plan)
   }
+  
   def close() = service.close()
   
-  (service.getRepo() !!! PlanRequest) onComplete { f =>
-    f.result.get.asInstanceOf[Tuple2[String,Plan]] match {
-      case (m,p) => { 
-        plan=p 
-        _metadata=m
+  private var _plan: Plan = null
+  private var _metadata: String = null
+  private def init() {
+    val r = service.getRepo()
+    (r !!! PlanRequest) onComplete { f =>
+      f.result.get.asInstanceOf[Tuple2[String,Plan]] match {
+        case (m,p) => { 
+          plan=p 
+          _metadata=m
+        }
       }
+    }
+  }
+
+  try {
+    init()
+  } catch {
+    case e: Exception => {
+      close()
+      throw e
     }
   }
 }

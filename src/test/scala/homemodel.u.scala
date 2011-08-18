@@ -113,7 +113,16 @@ class HomeModelSuite extends WordSpec with ShouldMatchers {
       flushed should be (true)
     }
 
-    """be able to clean up all its resources in an immediate error""" ignore {
+    """be able to clean up all its resources in an immediate error""" in {
+      var svcIsOpen=true
+      val svc = new IPlanDispatch {
+        def getRepo() = { throw new RuntimeException("sneezing fit") }
+        def close() = { svcIsOpen=false }
+      }
+      evaluating {
+        new HomeModelA(svc,()=>null)
+      } should produce[RuntimeException]
+      svcIsOpen should be (false)
     }
   }
 
